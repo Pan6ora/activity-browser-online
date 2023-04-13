@@ -1,0 +1,32 @@
+ARG ab_channel
+ARG ab_version
+
+FROM ab_online/${ab_channel}:${ab_version}
+
+ARG plugins_install
+ARG session_file
+
+USER root
+
+RUN ${plugins_install}
+
+USER mambauser
+
+# Install conda packages
+#RUN ${plugins_install}
+
+COPY ${session_file}    /home/mambauser/session.json
+COPY data               /home/mambauser/data
+COPY session.py         /home/mambauser/session.py
+COPY builder.py         /home/mambauser/builder.py
+
+USER root
+RUN chown -R mambauser:mambauser /home/mambauser
+USER mambauser
+RUN mkdir -p /home/mambauser/.local/share/ActivityBrowser
+RUN mkdir -p /home/mambauser/.local/share/Brightway3
+RUN eval "$(micromamba shell hook --shell=bash)" ; \
+    micromamba activate base ;  \
+    cd /home/mambauser ;        \
+    python builder.py
+EXPOSE 5900

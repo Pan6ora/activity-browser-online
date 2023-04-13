@@ -1,0 +1,44 @@
+MIDAS(1)                     User Manuals                    MINAS(1)
+
+
+NAME
+    ab_online - launch Activity Browser sessions with Docker and NoVNC
+
+SYNOPSIS
+    ab_online <command> [<args>]
+
+DESCRIPTION
+    Launch Activity Browser sessions and distribute them through NoVNC.
+
+OPTIONS
+    -v, --version   
+        Print software version
+
+    -h, --help
+        Print this manual
+
+COMMANDS
+    Midas commands are devided depending on the element you want to interact with.
+
+  Main commands
+    start <name>
+        Start a session from a template defined in data/sessions (warn if already running)
+
+    stop <name>
+        Stop the given session if running
+     
+    list [running]
+        List running sessions      
+
+ENVIRONMENT
+    ABONLINEPATH
+        If non-null the path of data folder
+
+AUTHOR
+    Rémy Le Calloch <remy@lecalloch.net>
+
+SEE ALSO
+    Code and documentation at <https://github.com/Pan6ora/ab-online>.
+    Activity Browser at <https://github.com/LCA-ActivityBrowser/activity-browser>
+
+Linux                Last change: APRIL 2023                    2

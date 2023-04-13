@@ -1,0 +1,13 @@
+__pycache__
+
+# TEMPORARY
+ab_docker
+
+# Ignore data except demo session
+ab_online/data/sessions/*
+ab_online/data/databases
+ab_online/data/plugins
+!ab_online/data/sessions/example.json
+
+# Ignore sessions storage
+ab_online/storage
