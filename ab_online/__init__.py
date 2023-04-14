@@ -1,15 +1,6 @@
 import sys
 
-from .client import Client
+from .CLI import CLI
 
 def run_ab_online():
-
-    client = Client()
-    args = sys.argv[1:]
-
-    if len(args) == 0:
-        while(True):
-            cmd = input("ab-online > ")
-            client.run(cmd)
-    else:
-        client.run(args)
+    cli = CLI(sys.argv[1:])

@@ -38,7 +38,7 @@ class Controller:
             self.delete_storage(session)
 
 
-    def start_session(self, session, force_build=False, reset_storage=False):
+    def start_session(self, session, restart=False, force_build=False, reset_storage=False):
         """start all machines from the given session
 
         session: a Session object or the name of a session file from data/sessions
@@ -76,7 +76,7 @@ class Controller:
             force_build = True
         if force_build:
             print("  - build session image")
-            self.build_machine(session)
+            self.build_session(session)
         
         print(f"  - create storage")
         self.create_storage(session,reset_storage)
@@ -151,9 +151,9 @@ class Controller:
 
     def build_all(self):
         for session in self.sessions.values():
-            self.build_machine(session)
+            self.build_session(session)
 
-    def build_machine(self, session):
+    def build_session(self, session):
         """create a docker image for the given session.
         This can take some time depending the amount of 
         plugins/databases but has to be done only once
