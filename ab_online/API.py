@@ -7,7 +7,7 @@ class API:
     def __init__(self):
         self.ctrl = Controller()
 
-    def start(self, session, all=False, force=False, build=True, reset=False):
+    def start_session(self, session, all=False, force=False, build=True, reset=False):
         """start given session
         """
         print(session)
@@ -16,7 +16,7 @@ class API:
         else:
             self.ctrl.start_session(session,force,build,reset)
 
-    def stop(self, session, all=False, reset=False):
+    def stop_session(self, session, all=False, reset=False):
         """stop given session
         """
         if all:
@@ -24,7 +24,7 @@ class API:
         else:
             self.ctrl.stop_session(session, reset)
 
-    def build(self, session, all=False):
+    def build_session(self, session, all=False):
         """build given session
         """
         if all:
@@ -32,7 +32,12 @@ class API:
         else:
             self.ctrl.build_session(session)       
     
-    def ps(self, running=False):
+    def list_sessions(self, running=False):
         """list existing sessions
         """
-        [print(s.esc_name) for s in self.ctrl.sessions.values()]
+        return [s.esc_name for s in self.ctrl.sessions.values()]
+
+    def validate_file(self, file):
+        """perform checks on a session file
+        """
+        return "Not yet implemented"
