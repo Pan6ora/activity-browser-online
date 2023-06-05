@@ -55,6 +55,8 @@ class DockerController:
         if isinstance(session, str):
             if session not in self.sessions.keys():
                 raise ValueError(f"session '{session}' does not exist")
+            else:
+                session = self.sessions[session]
             
         print(f"Starting '{session.name}' session...")
 
