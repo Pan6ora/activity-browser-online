@@ -6,16 +6,19 @@ import docker
 
 from .session import Session
 
-class Controller:
+class DockerController:
 
     def __init__(self):
-        self.data_path = pkg_resources.resource_filename(__name__, 'data')
-        self.includes_path = pkg_resources.resource_filename(__name__, 'includes')
-        self.storage_path = pkg_resources.resource_filename(__name__, 'storage')
+        self.data_path = pkg_resources.resource_filename(__name__, '../data')
+        self.includes_path = pkg_resources.resource_filename(__name__, '../includes')
+        self.storage_path = pkg_resources.resource_filename(__name__, '../storage')
         self.client = docker.from_env()
         self.sessions = self.read_sessions(f"{self.data_path}/sessions")
         
     def read_sessions(self,path):
+        """load all session files from given path and
+        return them as a dictionary of Session objects 
+        """
         sessions = {}
         for file in os.listdir(path):
             session = Session(f"{path}/{file}")
@@ -23,6 +26,10 @@ class Controller:
         return sessions
 
     def stop_session(self, session, reset_storage=False):
+        """ Stop given machine if running
+
+        reset_storage: delete session data from the computer
+        """
 
         if isinstance(session, str):
             session = self.sessions[session]
@@ -46,7 +53,8 @@ class Controller:
         reset_storage: wether to delete past runs session storage
         """
         if isinstance(session, str):
-            session = self.sessions[session]
+            if session not in self.sessions.keys():
+                raise ValueError(f"session '{session}' does not exist")
             
         print(f"Starting '{session.name}' session...")
 

@@ -4,40 +4,48 @@ import os
 class Session:
 
     def __init__(self,file):
-        """instanciate a session from a
+        """instantiate a session from a
         json file"""
         self.file = file
         self.filename = os.path.basename(file)
-        self.session_dict = self.file_to_dict()
-        self.validate_session_dict()
-        
-        self.name       = self.session_dict["name"]
+        session_dict = self.validate_session(file)
+        # Populate session infos
+        self.name       = session_dict["name"]
         self.esc_name   = self.name.replace(" ", "_")
         self.tag        = f"ab_online/session:{self.esc_name}"
-        self.password   = self.session_dict["password"]
-        self.machines   = self.session_dict["machines"] 
-        self.ab_channel = self.session_dict["ab_channel"]
-        self.ab_version = self.session_dict["ab_version"]
+        self.password   = session_dict["password"]
+        self.machines   = session_dict["machines"] 
+        self.ab_channel = session_dict["ab_channel"]
+        self.ab_version = session_dict["ab_version"]
         self.plugins = {}
-        for x in self.session_dict["plugins"]:
-            self.plugins[x["name"]] = Plugin(x)
-        self.projects = {}
-        for x in self.session_dict["projects"]:
-            self.projects[x["name"]] = Project(x)
         self.databases = {}
-        for x in self.session_dict["databases"]:
+        self.projects = {}
+        # Populate plugins list
+        for x in session_dict["plugins"]:
+            self.plugins[x["name"]] = Plugin(x)
+        # Populate databases list
+        for x in session_dict["databases"]:
             self.databases[x["name"]] = Database(x)
+        # Populate projects list
+        for x in session_dict["projects"]:
+            project = Project(x["name"])
+            for db in x["databases"]:
+                project.add_database(db)
+            for plugin in x["plugins"]:
+                project.add_plugin(plugin)
+            self.projects[x["name"]] = project
 
-    def file_to_dict(self):
-        f = open(self.file)
+    def file_to_dict(self, file):
+        f = open(file)
         session_dict = json.load(f)
         f.close()
         return session_dict
 
-    def validate_session_dict(self):
+    def validate_session(self, file):
         """ perform a list of tests on a
         session to check if it is valid
         """
+        session_dict = file_to_dict(file)
         # check primary key list
         for key in ["name", 
                     "password", 
@@ -47,46 +55,50 @@ class Session:
                     "databases",
                     "plugins",
                     "projects" ]:
-            if key not in self.session_dict:
+            if key not in session_dict:
                 return f"'{key}' entry missing"
         # check databases keys
-        for database in self.session_dict["databases"]:
+        for database in session_dict["databases"]:
             for key in ["name","location","filename"]:
                 if key not in database:
                     return f"a database has no {key}"
         # check plugins keys
-        for plugin in self.session_dict["plugins"]:
+        for plugin in session_dict["plugins"]:
             for key in ["name","ab_channel","version"]:
                 if key not in plugin:
                     return f"a plugin has no {key}"
         # check projects keys
-        for project in self.session_dict["projects"]:
+        for project in session_dict["projects"]:
             for key in ["name","databases","plugins"]:
                 if key not in project:
                     return f"a project has no {key}"
 
-        databases = ["databases",[x["name"] for x in self.session_dict["databases"]],]
-        plugins   = ["plugins",[x["name"] for x in self.session_dict["plugins"]],]
-        projects  = ["projects",[x["name"] for x in self.session_dict["projects"]],]
+        databases = ["databases",[x["name"] for x in session_dict["databases"]],]
+        plugins   = ["plugins",[x["name"] for x in session_dict["plugins"]],]
+        projects  = ["projects",[x["name"] for x in session_dict["projects"]],]
         # check entries with same name
         for entries in [databases,plugins,projects]:
             if len(entries[1]) != len(list(set(entries[1]))):
                 return f"2 or more {entries[0]} with same name exist"
         # check for non-existing entries
-        for project in self.session_dict["projects"]:
+        for project in session_dict["projects"]:
             for db in project["databases"]:
                 if db not in databases[1]:
                     return f"{db} database in project '{project['name']}' not in main databases list"
             for pl in project["plugins"]:
                 if pl not in plugins[1]:
                     return f"{pl} plugin in project '{project['name']}' not in main plugins list"
-        return 0
+        return session_dict
 
 class Project:
-    def __init__(self, project_dict):
-        self.name       = project_dict["name"]
-        self.databases  = project_dict["databases"]
-        self.plugins    = project_dict["plugins"]
+    def __init__(self, name):
+        self.name       = name
+
+    def add_database(self, db):
+        self.databases[db.name] = db
+
+    def add_plugin(self, plugin):
+        self.plugins[plugin.name] = plugin
 
 class Plugin:
     def __init__(self, plugin_dict):
