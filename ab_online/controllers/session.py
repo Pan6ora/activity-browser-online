@@ -30,9 +30,9 @@ class Session:
         for x in session_dict["projects"]:
             project = Project(x["name"])
             for db in x["databases"]:
-                project.add_database(db)
+                project.add_database(self.databases[db])
             for plugin in x["plugins"]:
-                project.add_plugin(plugin)
+                project.add_plugin(self.plugins[plugin])
             self.projects[x["name"]] = project
 
     def file_to_dict(self, file):
@@ -45,7 +45,7 @@ class Session:
         """ perform a list of tests on a
         session to check if it is valid
         """
-        session_dict = file_to_dict(file)
+        session_dict = self.file_to_dict(file)
         # check primary key list
         for key in ["name", 
                     "password", 
@@ -93,6 +93,8 @@ class Session:
 class Project:
     def __init__(self, name):
         self.name       = name
+        self.databases = {}
+        self.plugins = {}
 
     def add_database(self, db):
         self.databases[db.name] = db
