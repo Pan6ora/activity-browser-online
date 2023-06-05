@@ -3,13 +3,20 @@ import sys
 
 from .API import API
 
+class Parser(argparse.ArgumentParser):
+    def error(self, message):
+        sys.stderr.write('\nerror: %s\n\n' % message)
+        self.print_help()
+        sys.stderr.write('\n')
+        sys.exit(2)
+
 class CLI:
 
     def __init__(self, args):
         
         self.api = API()
 
-        self.parser = argparse.ArgumentParser(prog="ab-online",description="Launch reproducible Activity Browser sessions and distribute them using NoVNC.")
+        self.parser = Parser(prog="ab-online",description="Launch reproducible Activity Browser sessions and distribute them using NoVNC.")
         subparsers = self.parser.add_subparsers(title="commands")
         self.parser.set_defaults(func=self.parser.print_help)
         
@@ -25,8 +32,8 @@ class CLI:
                            help="force rebuilding docker image")
         start.add_argument("-r","--reset", action="store_true",
                            help="delete session containers storage")
-        start.add_argument("session", nargs="?", default="", 
-                           help="session name")
+        start.add_argument("sessions", nargs="+", 
+                           help="session(s) name(s)")
 
         build = subparsers.add_parser("build",
                                       description="Build a session.",
@@ -34,8 +41,8 @@ class CLI:
         build.set_defaults(func=self.api.build_session)
         build.add_argument("-a","--all", action="store_true",
                            help="build all sessions")
-        build.add_argument("session", nargs="?", default="", 
-                           help="session name")
+        build.add_argument("sessions", nargs="?", default="", 
+                           help="session(s) names")
 
         stop = subparsers.add_parser("stop",
                                      description="Stop a running session.",
@@ -58,10 +65,13 @@ class CLI:
         self.run(args)
 
     def run(self, args):
-        args = self.parser.parse_args(args)
-        func = args.__dict__.pop('func')
-        result = func(**vars(args))
-        self.pretty_print(result)
+        try:
+            args = self.parser.parse_args(args)
+            func = args.__dict__.pop('func')
+            result = func(**vars(args))
+            self.pretty_print(result)
+        except Exception as e:
+            print(f"error: {e}")
 
     def pretty_print(self, value):
         """print object depending it's type
