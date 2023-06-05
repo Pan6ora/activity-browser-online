@@ -3,7 +3,7 @@ import json
 import brightway2 as bw
 from bw2io.package import BW2Package
 
-from session import Session
+from controllers.session import Session
 
 session = Session("session.json")
 
