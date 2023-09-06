@@ -1,169 +1,128 @@
 import os
 import shutil
-import pkg_resources
 
 import docker
 
-from .session import Session
+from ..session import Session
+from .. import config
+from .storage import Storage
 
-class DockerController:
+class Docker:
 
-    def __init__(self):
-        self.data_path = pkg_resources.resource_filename(__name__, '../data')
-        self.includes_path = pkg_resources.resource_filename(__name__, '../includes')
-        self.storage_path = pkg_resources.resource_filename(__name__, '../storage')
-        self.client = docker.from_env()
-        self.sessions = self.read_sessions(f"{self.data_path}/sessions")
-        
-    def read_sessions(self,path):
-        """load all session files from given path and
-        return them as a dictionary of Session objects 
-        """
-        sessions = {}
-        for file in os.listdir(path):
-            session = Session(f"{path}/{file}")
-            sessions[session.esc_name] = session
-        return sessions
+    storage_path = f"{config.STORAGE}/sessions_storage"
+    client = docker.from_env()
 
-    def stop_session(self, session, reset_storage=False):
-        """ Stop given machine if running
-
-        reset_storage: delete session data from the computer
-        """
-
-        if isinstance(session, str):
-            session = self.sessions[session]
-
-        print("  - stop existing containers")
-        self.stop_containers(session)
-        
-        print(f"  - remove existing '{session.esc_name}' network")
-        self.remove_network(session)
-
-        if reset_storage:
-            print(f"  - delete session storage")
-            self.delete_storage(session)
-
-
-    def start_session(self, session, restart=False, force_build=False, reset_storage=False):
-        """start all machines from the given session
-
-        session: a Session object or the name of a session file from data/sessions
-        force_build: wether to build session container if already exist
-        reset_storage: wether to delete past runs session storage
-        """
-        if isinstance(session, str):
-            if session not in self.sessions.keys():
-                raise ValueError(f"session '{session}' does not exist")
-            else:
-                session = self.sessions[session]
-            
-        print(f"Starting '{session.name}' session...")
-
-        print("  - stop existing session")
-        self.stop_session(session, reset_storage)
-        
-        print(f"  - create '{session.esc_name}' network")
-        self.client.networks.create(session.esc_name)
-
-        tag = "ab_online/novnc:latest"
-        try:
-            self.client.images.get(tag)
-        except:
-            print("  - build novnc image")
-            self.build_novnc()         
-
-        tag = f"ab_online/{session.ab_channel}:{session.ab_version.replace('+','')}"
-        try:
-            self.client.images.get(tag)
-        except:
-            print("  - build Activity Browser image")
-            self.build_ab(session.ab_channel, session.ab_version)       
-        
-        try:
-            self.client.images.get(session.tag)
-        except docker.errors.ImageNotFound:
-            force_build = True
-        if force_build:
-            print("  - build session image")
-            self.build_session(session)
-        
-        print(f"  - create storage")
-        self.create_storage(session,reset_storage)
-        
-        print(f"  - create tokens")
-        self.generate_tokens_file(session)        
-        
-        print(f"  - start novnc container")
-        self.start_novnc_gate(session)
-        
-        print(f"  - start {session.machines} containers from image {session.tag}")
-        for id in range(session.machines):
-            self.start_machine(session, id=id)
-        
-        print("Done !")
-
-    def stop_containers(self, session):
-        for c in self.client.containers.list(filters={"network": session.esc_name}):
+    @classmethod
+    def stop_containers(cls, session):
+        for c in cls.client.containers.list(filters={"network": session.esc_name}):
             c.stop()
-        self.client.containers.prune()
+        cls.client.containers.prune()
 
-    def remove_network(self, session):
-        for network in self.client.networks.list():
+    @classmethod
+    def stop_proxy(cls):
+        try:
+            proxy = cls.client.containers.get("proxy")
+            proxy.stop()
+            cls.client.containers.prune()
+        except:
+            pass
+
+    @classmethod
+    def remove_network(cls, session):
+        for network in cls.client.networks.list():
             if network.name == session.esc_name:
                 network.remove()
-        self.client.networks.prune()
+        cls.client.networks.prune()
 
-    def delete_storage(self, session):
-        shutil.rmtree(f"{self.storage_path}/{session.esc_name}")
+    @classmethod
+    def remove_main_network(cls):
+        try:
+            networks = cls.client.networks.list(names="ABonline")
+            for network in networks:
+                network.remove()
+            cls.client.networks.prune()
+        except:
+            pass
 
-    def create_storage(self, session, reset_storage):
-        if reset_storage:
-            self.delete_storage(session)
-        os.makedirs(f"{self.storage_path}/{session.esc_name}", exist_ok=True)
-        #for i in range(session.machines):
-        #    os.makedirs(f"{self.storage_path}/{session.esc_name}/{i}", exist_ok=True) 
+    @classmethod
+    def update_Caddyfile(cls):
+        print("NOT YET IMPLEMENTED")
+        pass
 
-    def generate_tokens_file(self, session):
-        os.makedirs(f"{self.storage_path}/{session.esc_name}/novnc", exist_ok=True)
-        with open(f"{self.storage_path}/{session.esc_name}/novnc/token.list", "w") as file:
-            for i in range(session.machines):
-                file.write(f"{i}: {session.esc_name}-{i}:5900\n")
+    @classmethod
+    def start_caddy_proxy(cls):
+        """start main reverse proxy
+        """
+        Storage.create_folder("proxy/data")
+        Storage.create_folder("proxy/storage")
+        Storage.create_folder("proxy/static")
+        Storage.add_file(f"{config.INCLUDES}/Caddyfile","Caddyfile","proxy")
+        Storage.add_file(f"{config.INCLUDES}/index.html","index.html","proxy/static")
+        proxy = cls.client.containers.run("androw/caddy-security:latest",
+                                   detach=True,
+                                   ports= {"80/tcp": 80,
+                                           "443/tcp": 443
+                                           },
+                                   name="proxy",
+                                   hostname="proxy",
+                                   volumes={f"{config.STORAGE}/proxy/data": {'bind': '/data', 'mode': 'rw'},
+                                            f"{config.STORAGE}/proxy/storage": {'bind': '/storage', 'mode': 'rw'},
+                                            f"{config.STORAGE}/proxy/Caddyfile": {'bind': '/etc/caddy/Caddyfile', 'mode': 'ro'},
+                                            f"{config.STORAGE}/proxy/static": {'bind': '/home/home', 'mode': 'ro'},
+                                            f"{config.STORAGE}/sessions_storage": {'bind': '/home/storage', 'mode': 'ro'}
+                                           }
+        )
+        network = cls.get_network_by_name("ABonline")
+        network.connect(proxy)
 
-    def start_novnc_gate(self, session):
+    @classmethod
+    def reload_caddyfile(cls):
+        proxy = cls.client.containers.get("proxy")
+        proxy.exec_run(cmd="caddy reload", workdir="/etc/caddy")
+
+    @classmethod
+    def start_novnc_gate(cls, session):
         """create tokens and start the docker container
         with novnc client
         """
-        name = f"{session.esc_name}-gate"
-        self.client.containers.run("ab_online/novnc:latest",
+        gate_name = f"{session.esc_name}-gate"
+        gate = cls.client.containers.run("ab_online/novnc:latest",
                                    detach=True,
-                                   ports= {"8080/tcp": 8080},
-                                   name=name,
-                                   hostname=name,
+                                   name=gate_name,
+                                   hostname=gate_name,
                                    network=session.esc_name,
-                                   volumes={f"{self.storage_path}/{session.esc_name}/novnc": {'bind': '/root/storage', 'mode': 'ro'}}
-                                   )        
+                                   volumes={f"{cls.storage_path}/{session.esc_name}/novnc": {'bind': '/root/storage', 'mode': 'ro'}}
+                                   )
+        network = cls.get_network_by_name("ABonline")
+        network.connect(gate)
 
-    def start_machine(self, session, id=0):
+    @classmethod
+    def get_network_by_name(cls, name):
+        network = cls.client.networks.list(names=["ABonline",])
+        return network[0]
+       
+    @classmethod
+    def start_machine(cls, session, id=0):
         """start a new machine taking settings
         from the given session
         """
         name = f"{session.esc_name}-{id}"
 
-        self.client.containers.run(session.tag,
+        cls.client.containers.run(session.tag,
                                    detach=True,
                                    name=name,
                                    hostname=name,
                                    network=session.esc_name,
-                                   #volumes={f"{self.storage_path}/{session.esc_name}/{id}": {'bind': '/home/mambauser/.local/share/Brightway3', 'mode': 'rw'}}
+                                   #volumes={f"{cls.storage_path}/{session.esc_name}/{id}": {'bind': '/home/mambauser/.local/share/Brightway3', 'mode': 'rw'}}
                                    )
         
+    @classmethod
+    def build_all(cls):
+        for session in cls.sessions.values():
+            cls.build_sAyotzinapaession(session)
 
-    def build_all(self):
-        for session in self.sessions.values():
-            self.build_session(session)
-
-    def build_session(self, session):
+    @classmethod
+    def build_session(cls, session):
         """create a docker image for the given session.
         This can take some time depending the amount of 
         plugins/databases but has to be done only once
@@ -171,26 +130,65 @@ class DockerController:
         plugins_install = "micromamba install -y -n base"
         plugins_list = ""
         for plugin in session.plugins.values():
-            if plugin.ab_channel != "local":
-                plugins_install += f" -c {plugin.ab_channel}"
+            if plugin.channel != "local":
+                plugins_install += f" -c {plugin.channel}"
                 plugins_list += f" ab-plugin-{plugin.name}"
-        plugins_install += f" -c conda-forge{plugins_list}"
+        plugins_install += f" -c conda-forge {plugins_list}"
 
+        if config.DEV:
+            setup_command = "python run-ab-online.py setup session.json"
+            Storage.delete_folder("local_code")
+            shutil.copytree(f"{config.INCLUDES}/../..", f"{config.STORAGE}/local_code")
+        else:
+            setup_command = "ab-online setup session.json"
+
+        tag = f"ab_online/{session.ab_channel}:{session.ab_version.replace('+','')}"
+        try:
+            Docker.client.images.get(tag)
+        except:
+            print("  - build Activity Browser image")
+            Docker.build_ab(session.ab_channel, session.ab_version)  
+
+        print(plugins_install)
         buildargs = {
             "plugins_install": plugins_install,
-            "session_file": f"data/sessions/{session.filename}",
+            "session_file": f"sessions/{session.esc_name}.json",
             "ab_channel": session.ab_channel,
-            "ab_version": session.ab_version.replace('+','')
+            "ab_version": session.ab_version.replace('+',''),
+            "setup_command": setup_command
         }
-        self.client.images.build(path=pkg_resources.resource_filename(__name__, '.'),
-                                 dockerfile=f"{self.includes_path}/Dockerfile_machine",
+        image, build_logs = cls.client.images.build(path=config.STORAGE,
+                                 dockerfile=f"Dockerfile_machine",
                                  buildargs=buildargs,
                                  tag=session.tag,
                                  rm=True,
                                  forcerm=True)
-        return session.tag
+        cls.log_docker_output(build_logs)
 
-    def build_ab(self, channel, version):
+        if config.DEV:
+            Storage.delete_folder("local_code")
+
+    @classmethod
+    def log_docker_output(cls, generator, task_name: str = 'docker command execution') -> None:
+        """
+        Log output to console from a generator returned from docker client
+        :param Any generator: The generator to log the output of
+        :param str task_name: A name to give the task, i.e. 'Build database image', used for logging
+        """
+        while True:
+            try:
+                output = generator.__next__()
+                if 'stream' in output:
+                    output_str = output['stream'].strip('\r\n').strip('\n')
+                    print(output_str)
+            except StopIteration:
+                print(f'{task_name} complete.')
+                break
+            except ValueError:
+                print(f'Error parsing output from {task_name}: {output}')
+
+    @classmethod
+    def build_ab(cls, channel, version):
         """create the activity browser image with
         given channel and version.
         """
@@ -199,7 +197,7 @@ class DockerController:
             "ab_channel": channel,
             "ab_version": version
         }  
-        self.client.images.build(path=self.includes_path,
+        cls.client.images.build(path=config.INCLUDES,
                                  dockerfile="Dockerfile_ab",
                                  buildargs= buildargs,
                                  tag=tag,
@@ -207,11 +205,12 @@ class DockerController:
                                  forcerm=True)
         return tag
 
-    def build_novnc(self):
+    @classmethod
+    def build_novnc(cls):
         """create the novnc image
         """
         tag = "ab_online/novnc:latest"
-        self.client.images.build(path=self.includes_path,
+        cls.client.images.build(path=config.INCLUDES,
                                  dockerfile="Dockerfile_novnc",
                                  tag=tag,
                                  rm=True,

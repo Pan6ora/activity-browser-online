@@ -1,31 +1,49 @@
 import json
-import os
+
+from .plugin import Plugin
+from .database import Database
+from .project import Project
 
 class Session:
+    """AB Online session
+    """
 
-    def __init__(self,file):
+    def __init__(self, file=None):
         """instantiate a session from a
         json file"""
-        self.file = file
-        self.filename = os.path.basename(file)
+        self.file:       str                #: path of json file of the session
+        self.name:       str                #: session name
+        self.esc_name:   str                #: escaped name (without spaces)
+        self.tag:        str                #: docker session image tag
+        self.password:   str                #: session connection password
+        self.machines:   int                #: number of machines
+        self.ab_channel: str                #: Activity Browser anaconda channel
+        self.ab_version: str                #: Activity Browser conda version
+        self.plugins:    dict[str,Plugin]   = {} #: session plugins
+        self.databases:  dict[str,Database] = {} #: session databases
+        self.projects:   dict[str,Project]  = {} #: session projects 
+
+        if file: self.populate_from_file(file)       
+        
+    def populate_from_file(self,file):
+        """Populate session values from a session file
+        """
         session_dict = self.validate_session(file)
         # Populate session infos
+        self.file = file
         self.name       = session_dict["name"]
-        self.esc_name   = self.name.replace(" ", "_")
+        self.esc_name   = self.name.replace(" ", "_").lower()
         self.tag        = f"ab_online/session:{self.esc_name}"
         self.password   = session_dict["password"]
         self.machines   = session_dict["machines"] 
         self.ab_channel = session_dict["ab_channel"]
         self.ab_version = session_dict["ab_version"]
-        self.plugins = {}
-        self.databases = {}
-        self.projects = {}
         # Populate plugins list
         for x in session_dict["plugins"]:
-            self.plugins[x["name"]] = Plugin(x)
+            self.plugins[x["name"]] = Plugin(x['name'],x['ab_channel'],x['version'])
         # Populate databases list
         for x in session_dict["databases"]:
-            self.databases[x["name"]] = Database(x)
+            self.databases[x["name"]] = Database(x["name"],x["filename"],x["location"])
         # Populate projects list
         for x in session_dict["projects"]:
             project = Project(x["name"])
@@ -35,17 +53,21 @@ class Session:
                 project.add_plugin(self.plugins[plugin])
             self.projects[x["name"]] = project
 
-    def file_to_dict(self, file):
-        f = open(file)
-        session_dict = json.load(f)
-        f.close()
-        return session_dict
+    def read_json(self, file: str):
+        """Convert json file to python dict
+
+        :return: a new dictionary with json content
+        :rtype: dict
+        """
+        with open(file) as f:
+            result_dict = json.load(f)
+            return result_dict
 
     def validate_session(self, file):
         """ perform a list of tests on a
         session to check if it is valid
         """
-        session_dict = self.file_to_dict(file)
+        session_dict = self.read_json(file)
         # check primary key list
         for key in ["name", 
                     "password", 
@@ -89,27 +111,3 @@ class Session:
                 if pl not in plugins[1]:
                     return f"{pl} plugin in project '{project['name']}' not in main plugins list"
         return session_dict
-
-class Project:
-    def __init__(self, name):
-        self.name       = name
-        self.databases = {}
-        self.plugins = {}
-
-    def add_database(self, db):
-        self.databases[db.name] = db
-
-    def add_plugin(self, plugin):
-        self.plugins[plugin.name] = plugin
-
-class Plugin:
-    def __init__(self, plugin_dict):
-        self.name       = plugin_dict["name"]
-        self.ab_channel = plugin_dict["ab_channel"]
-        self.version    = plugin_dict["version"]
-
-class Database:
-    def __init__(self, database_dict):
-        self.name       = database_dict["name"]
-        self.filename   = database_dict["filename"]
-        self.location   = database_dict["location"]

@@ -5,20 +5,24 @@ FROM ab_online/${ab_channel}:${ab_version}
 
 ARG plugins_install
 ARG session_file
+ARG setup_command
 
 USER root
 
+RUN micromamba install -y -n base -c conda-forge -c pan6ora activity-browser-online pip
 RUN ${plugins_install}
+RUN micromamba remove -y -n base --force pyside2 qt-main qt-webengine
+RUN micromamba install -y -n base -c conda-forge pyside2=5.15.4 qt-main=5.15.4 qt-webengine=5.15.4
 
 USER mambauser
 
-# Install conda packages
-#RUN ${plugins_install}
-
 COPY ${session_file}    /home/mambauser/session.json
-COPY data               /home/mambauser/data
-COPY session.py         /home/mambauser/session.py
-COPY builder.py         /home/mambauser/builder.py
+
+RUN mkdir -p /home/mambauser/.local/share/ActivityBrowserOnline
+RUN mkdir -p /home/mambauser/.local/share/ActivityBrowserOnline/databases
+COPY databases/* /home/mambauser/.local/share/ActivityBrowserOnline/databases/
+COPY local_code/ab_online /home/mambauser/ab_online
+COPY local_code/run-ab-online.py /home/mambauser/run-ab-online.py
 
 USER root
 RUN chown -R mambauser:mambauser /home/mambauser
@@ -28,5 +32,7 @@ RUN mkdir -p /home/mambauser/.local/share/Brightway3
 RUN eval "$(micromamba shell hook --shell=bash)" ; \
     micromamba activate base ;  \
     cd /home/mambauser ;        \
-    python builder.py
+    pip install docker ;        \
+    ${setup_command}
+RUN rm -rf /home/mambauser/.local/share/ActivityBrowserOnline
 EXPOSE 5900
