@@ -2,3 +2,5 @@ sphinx
 sphinx-argparse
 myst-parser
 sphinx-rtd-theme
+appdirs
+docker
