@@ -2,7 +2,6 @@ from ..controllers import *
 
 
 class API:
-
     from .session import session
     from .db import db
 
@@ -10,8 +9,7 @@ class API:
         pass
 
     def validate_file(self, file):
-        """perform checks on a session file
-        """
+        """perform checks on a session file"""
         pass
 
     @staticmethod
@@ -37,4 +35,3 @@ class API:
         :type verbose: bool, optional
         """
         return Storage.list_files("databases", extension=False)
-        

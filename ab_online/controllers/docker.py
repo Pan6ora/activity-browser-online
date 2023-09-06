@@ -7,8 +7,8 @@ from ..session import Session
 from .. import config
 from .storage import Storage
 
-class Docker:
 
+class Docker:
     storage_path = f"{config.STORAGE}/sessions_storage"
     try:
         client = docker.from_env()
@@ -49,26 +49,31 @@ class Docker:
 
     @classmethod
     def start_caddy_proxy(cls):
-        """start main reverse proxy
-        """
+        """start main reverse proxy"""
         Storage.create_folder("proxy/data")
         Storage.create_folder("proxy/storage")
         Storage.create_folder("proxy/static")
-        Storage.add_file(f"{config.INCLUDES}/Caddyfile","Caddyfile","proxy")
-        Storage.add_file(f"{config.INCLUDES}/index.html","index.html","proxy/static")
-        proxy = cls.client.containers.run("androw/caddy-security:latest",
-                                   detach=True,
-                                   ports= {"80/tcp": 80,
-                                           "443/tcp": 443
-                                           },
-                                   name="proxy",
-                                   hostname="proxy",
-                                   volumes={f"{config.STORAGE}/proxy/data": {'bind': '/data', 'mode': 'rw'},
-                                            f"{config.STORAGE}/proxy/storage": {'bind': '/storage', 'mode': 'rw'},
-                                            f"{config.STORAGE}/proxy/Caddyfile": {'bind': '/etc/caddy/Caddyfile', 'mode': 'ro'},
-                                            f"{config.STORAGE}/proxy/static": {'bind': '/home/home', 'mode': 'ro'},
-                                            f"{config.STORAGE}/sessions_storage": {'bind': '/home/storage', 'mode': 'ro'}
-                                           }
+        Storage.add_file(f"{config.INCLUDES}/Caddyfile", "Caddyfile", "proxy")
+        Storage.add_file(f"{config.INCLUDES}/index.html", "index.html", "proxy/static")
+        proxy = cls.client.containers.run(
+            "androw/caddy-security:latest",
+            detach=True,
+            ports={"80/tcp": 80, "443/tcp": 443},
+            name="proxy",
+            hostname="proxy",
+            volumes={
+                f"{config.STORAGE}/proxy/data": {"bind": "/data", "mode": "rw"},
+                f"{config.STORAGE}/proxy/storage": {"bind": "/storage", "mode": "rw"},
+                f"{config.STORAGE}/proxy/Caddyfile": {
+                    "bind": "/etc/caddy/Caddyfile",
+                    "mode": "ro",
+                },
+                f"{config.STORAGE}/proxy/static": {"bind": "/home/home", "mode": "ro"},
+                f"{config.STORAGE}/sessions_storage": {
+                    "bind": "/home/storage",
+                    "mode": "ro",
+                },
+            },
         )
         network = cls.get_network_by_name("ABonline")
         network.connect(proxy)
@@ -84,21 +89,31 @@ class Docker:
         with novnc client
         """
         gate_name = f"{session.esc_name}-gate"
-        gate = cls.client.containers.run("ab_online/novnc:latest",
-                                   detach=True,
-                                   name=gate_name,
-                                   hostname=gate_name,
-                                   network=session.esc_name,
-                                   volumes={f"{cls.storage_path}/{session.esc_name}/novnc": {'bind': '/root/storage', 'mode': 'ro'}}
-                                   )
+        gate = cls.client.containers.run(
+            "ab_online/novnc:latest",
+            detach=True,
+            name=gate_name,
+            hostname=gate_name,
+            network=session.esc_name,
+            volumes={
+                f"{cls.storage_path}/{session.esc_name}/novnc": {
+                    "bind": "/root/storage",
+                    "mode": "ro",
+                }
+            },
+        )
         network = cls.get_network_by_name("ABonline")
         network.connect(gate)
 
     @classmethod
     def get_network_by_name(cls, name):
-        network = cls.client.networks.list(names=["ABonline",])
+        network = cls.client.networks.list(
+            names=[
+                "ABonline",
+            ]
+        )
         return network[0]
-       
+
     @classmethod
     def start_machine(cls, session, id=0):
         """start a new machine taking settings
@@ -106,14 +121,15 @@ class Docker:
         """
         name = f"{session.esc_name}-{id}"
 
-        cls.client.containers.run(session.tag,
-                                   detach=True,
-                                   name=name,
-                                   hostname=name,
-                                   network=session.esc_name,
-                                   #volumes={f"{cls.storage_path}/{session.esc_name}/{id}": {'bind': '/home/mambauser/.local/share/Brightway3', 'mode': 'rw'}}
-                                   )
-        
+        cls.client.containers.run(
+            session.tag,
+            detach=True,
+            name=name,
+            hostname=name,
+            network=session.esc_name,
+            # volumes={f"{cls.storage_path}/{session.esc_name}/{id}": {'bind': '/home/mambauser/.local/share/Brightway3', 'mode': 'rw'}}
+        )
+
     @classmethod
     def build_all(cls):
         for session in cls.sessions.values():
@@ -122,7 +138,7 @@ class Docker:
     @classmethod
     def build_session(cls, session):
         """create a docker image for the given session.
-        This can take some time depending the amount of 
+        This can take some time depending the amount of
         plugins/databases but has to be done only once
         """
         plugins_install = "micromamba install -y -n base"
@@ -145,28 +161,32 @@ class Docker:
             Docker.client.images.get(tag)
         except:
             print("  - build Activity Browser image")
-            Docker.build_ab(session.ab_channel, session.ab_version)  
+            Docker.build_ab(session.ab_channel, session.ab_version)
 
         buildargs = {
             "plugins_install": plugins_install,
             "session_file": f"sessions/{session.esc_name}.json",
             "ab_channel": session.ab_channel,
-            "ab_version": session.ab_version.replace('+',''),
-            "setup_command": setup_command
+            "ab_version": session.ab_version.replace("+", ""),
+            "setup_command": setup_command,
         }
-        image, build_logs = cls.client.images.build(path=config.STORAGE,
-                                 dockerfile=f"Dockerfile_machine",
-                                 buildargs=buildargs,
-                                 tag=session.tag,
-                                 rm=True,
-                                 forcerm=True)
+        image, build_logs = cls.client.images.build(
+            path=config.STORAGE,
+            dockerfile=f"Dockerfile_machine",
+            buildargs=buildargs,
+            tag=session.tag,
+            rm=True,
+            forcerm=True,
+        )
         cls.log_docker_output(build_logs)
 
         if config.DEV:
             Storage.delete_folder("local_code")
 
     @classmethod
-    def log_docker_output(cls, generator, task_name: str = 'docker command execution') -> None:
+    def log_docker_output(
+        cls, generator, task_name: str = "docker command execution"
+    ) -> None:
         """
         Log output to console from a generator returned from docker client
         :param Any generator: The generator to log the output of
@@ -175,14 +195,14 @@ class Docker:
         while True:
             try:
                 output = generator.__next__()
-                if 'stream' in output:
-                    output_str = output['stream'].strip('\r\n').strip('\n')
+                if "stream" in output:
+                    output_str = output["stream"].strip("\r\n").strip("\n")
                     print(output_str)
             except StopIteration:
-                print(f'{task_name} complete.')
+                print(f"{task_name} complete.")
                 break
             except ValueError:
-                print(f'Error parsing output from {task_name}: {output}')
+                print(f"Error parsing output from {task_name}: {output}")
 
     @classmethod
     def build_ab(cls, channel, version):
@@ -190,27 +210,26 @@ class Docker:
         given channel and version.
         """
         tag = f"ab_online/{channel}:{version.replace('+','')}"
-        buildargs = {
-            "ab_channel": channel,
-            "ab_version": version
-        }  
-        cls.client.images.build(path=config.INCLUDES,
-                                 dockerfile="Dockerfile_ab",
-                                 buildargs= buildargs,
-                                 tag=tag,
-                                 rm=True,
-                                 forcerm=True)
+        buildargs = {"ab_channel": channel, "ab_version": version}
+        cls.client.images.build(
+            path=config.INCLUDES,
+            dockerfile="Dockerfile_ab",
+            buildargs=buildargs,
+            tag=tag,
+            rm=True,
+            forcerm=True,
+        )
         return tag
 
     @classmethod
     def build_novnc(cls):
-        """create the novnc image
-        """
+        """create the novnc image"""
         tag = "ab_online/novnc:latest"
-        cls.client.images.build(path=config.INCLUDES,
-                                 dockerfile="Dockerfile_novnc",
-                                 tag=tag,
-                                 rm=True,
-                                 forcerm=True)
+        cls.client.images.build(
+            path=config.INCLUDES,
+            dockerfile="Dockerfile_novnc",
+            tag=tag,
+            rm=True,
+            forcerm=True,
+        )
         return tag
-

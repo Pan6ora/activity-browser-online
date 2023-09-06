@@ -2,9 +2,9 @@ import json
 from ..session import Session
 from .. import config
 
-class Machine():
-    """This class is meant to be used from a machine docker container
-    """
+
+class Machine:
+    """This class is meant to be used from a machine docker container"""
 
     @classmethod
     def setup_session(cls, session_file):
@@ -40,15 +40,15 @@ class Machine():
             bw.bw2setup()
 
         if not default_exist:
-            bw.projects.delete_project("default",delete_dir=True)
+            bw.projects.delete_project("default", delete_dir=True)
         # set default project
         ABsettings = {
             "current_bw_dir": "/home/mambauser/.local/share/Brightway3",
-            "custom_bw_dirs": [
-                "/home/mambauser/.local/share/Brightway3"
-            ],
-            "startup_project": list(session.projects.keys())[0]
+            "custom_bw_dirs": ["/home/mambauser/.local/share/Brightway3"],
+            "startup_project": list(session.projects.keys())[0],
         }
         json_object = json.dumps(ABsettings, indent=4)
-        with open("/home/mambauser/.local/share/ActivityBrowser/ABsettings.json", "w") as f:
+        with open(
+            "/home/mambauser/.local/share/ActivityBrowser/ABsettings.json", "w"
+        ) as f:
             f.write(json_object)

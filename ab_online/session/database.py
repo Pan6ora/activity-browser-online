@@ -1,4 +1,3 @@
-
 class Database:
     def __init__(self, name: str, filename: str, location: str):
         """Describe a bw2package database
@@ -10,6 +9,6 @@ class Database:
         :param location: path to database folder
         :type location: str
         """
-        self.name: str       = name          #:
-        self.filename: str   = filename      #:
-        self.location: str   = location      #:
+        self.name: str = name  #:
+        self.filename: str = filename  #:
+        self.location: str = location  #:

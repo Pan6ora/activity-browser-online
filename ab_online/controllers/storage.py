@@ -5,8 +5,8 @@ import json
 
 from .. import config
 
-class Storage:
 
+class Storage:
     @classmethod
     def create_folder(cls, path):
         os.makedirs(f"{config.STORAGE}/{path}", exist_ok=True)
@@ -14,6 +14,10 @@ class Storage:
     @classmethod
     def delete_folder(cls, path):
         shutil.rmtree(f"{config.STORAGE}/{path}", ignore_errors=True)
+
+    @classmethod
+    def delete_file(cls, path):
+        os.remove(f"{config.STORAGE}/{path}")
 
     @classmethod
     def add_file(cls, file, name, folder="", force=False, link=False):
@@ -30,8 +34,10 @@ class Storage:
         """
         dest = f"{config.STORAGE}/{folder}/{name}"
         if force or not os.path.isfile(dest):
-            if not link: shutil.copyfile(file,dest)
-            else: os.symlink(file,dest)
+            if not link:
+                shutil.copyfile(file, dest)
+            else:
+                os.symlink(file, dest)
 
     @classmethod
     def list_files(cls, folder="", extension=True):
@@ -44,9 +50,9 @@ class Storage:
         """
         path = f"{config.STORAGE}/{folder}"
         if extension:
-            return(os.listdir(path))
+            return os.listdir(path)
         else:
-            return([os.path.splitext(filename)[0] for filename in os.listdir(path)])
+            return [os.path.splitext(filename)[0] for filename in os.listdir(path)]
 
     @classmethod
     def read_json(cls, file: str):
@@ -58,7 +64,7 @@ class Storage:
         with open(file) as f:
             result_dict = json.load(f)
             return result_dict
-    
+
     @classmethod
     def init_storage(cls):
         cls.create_folder("")
@@ -66,8 +72,23 @@ class Storage:
         cls.create_folder("databases")
         cls.create_folder("sessions_storage")
         cls.create_folder("proxy")
-        cls.add_file(f"{config.INCLUDES}/example_session.json","example.json","sessions")
-        cls.add_file(f"{config.INCLUDES}/.dockerignore",".dockerignore","")
-        cls.add_file(f"{config.INCLUDES}/databases/biosphere3.bw2package","biosphere3.bw2package","databases")
-        cls.add_file(f"{config.INCLUDES}/databases/Idemat.bw2package","Idemat.bw2package","databases")
-        cls.add_file(f"{config.INCLUDES}/Dockerfile_machine","Dockerfile_machine","", force=True)
+        cls.add_file(
+            f"{config.INCLUDES}/example_session.json", "example.json", "sessions"
+        )
+        cls.add_file(f"{config.INCLUDES}/.dockerignore", ".dockerignore", "")
+        cls.add_file(
+            f"{config.INCLUDES}/databases/biosphere3.bw2package",
+            "biosphere3.bw2package",
+            "databases",
+        )
+        cls.add_file(
+            f"{config.INCLUDES}/databases/Idemat.bw2package",
+            "Idemat.bw2package",
+            "databases",
+        )
+        cls.add_file(
+            f"{config.INCLUDES}/Dockerfile_machine",
+            "Dockerfile_machine",
+            "",
+            force=True,
+        )

@@ -1,13 +1,15 @@
-from ..controllers import *
+from ..controllers import Storage
+
 
 class db:
-
-    def __init__(self):
-        pass
-
     @staticmethod
-    def add(self, file: str, name: str, link: bool = False,
-            force: bool = False, format: str = "bw2package"):
+    def add(
+        file: str,
+        name: str,
+        link: bool = False,
+        force: bool = False,
+        format: str = "bw2package",
+    ):
         """Add a database to AB-Online
 
         :param file: path to the database file
@@ -21,19 +23,19 @@ class db:
         :param format: only bw2package format is currently supported, defaults to "bw2package"
         :type format: str, optional
         """
-        pass
+        Storage.add_file(file, name, folder="databases", force=force, link=link)
 
     @staticmethod
-    def remove(self, name: str):
+    def remove(name: str):
         """Remove a database from AB-Online
 
         :param name: name of file (without extension)
         :type name: str
         """
-        pass
+        Storage.delete_file(f"databases/{name}")
 
     @staticmethod
-    def update(self, database: str, file: str, link: bool = False):
+    def update(database: str, file: str, link: bool = False):
         """replace database by new file
 
         :param database: name of the database to update
@@ -41,6 +43,8 @@ class db:
         :param file: new database file path
         :type file: str
         :param link: create a link instead of copying file, defaults to False
-        :type link: bool, optional       
+        :type link: bool, optional
         """
-        pass
+        Storage.add_file(
+            file=file, name=database, folder="databases", force=True, link=link
+        )

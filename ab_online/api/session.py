@@ -1,5 +1,6 @@
 from ..controllers import *
 
+
 class session:
     def __init__(self):
         pass
@@ -25,15 +26,18 @@ class session:
         if sessions is None and not all:
             raise TypeError("at least one session name must be provided")
         if all:
-            [Sessions.start_session(s,force,build,reset) for s in Sessions.sessions.values()]
+            [
+                Sessions.start_session(s, force, build, reset)
+                for s in Sessions.sessions.values()
+            ]
         else:
-            [Sessions.start_session(s,force,build,reset) for s in sessions]
+            [Sessions.start_session(s, force, build, reset) for s in sessions]
 
     @staticmethod
     def stop(sessions: list[str], all=False, reset=False):
         """stop session(s) if running
 
-        :param sessions: a list of sessions names 
+        :param sessions: a list of sessions names
         :type sessions: list[str]
         :param all: stop all running sessions, defaults to False
         :type all: bool, optional
@@ -44,14 +48,14 @@ class session:
         if sessions is None and not all:
             raise TypeError("at least one session name must be provided")
         if all:
-            [Sessions.stop_session(s,reset) for s in Sessions.sessions.values()]
+            [Sessions.stop_session(s, reset) for s in Sessions.sessions.values()]
         else:
-            [Sessions.stop_session(s,reset) for s in sessions]
+            [Sessions.stop_session(s, reset) for s in sessions]
 
     # Divers
 
     @staticmethod
-    def build(sessions:list[str], all=False):
+    def build(sessions: list[str], all=False):
         """build session(s) docker image
 
         :param sessions: a list of sessions names
@@ -62,8 +66,8 @@ class session:
         if all:
             [Sessions.build_session(s) for s in Sessions.sessions.values()]
         else:
-            [Sessions.build_session(s) for s in sessions]      
-    
+            [Sessions.build_session(s) for s in sessions]
+
     @staticmethod
     def reset(sessions: list[str], all=False):
         """delete sessions data
@@ -77,7 +81,7 @@ class session:
 
     @staticmethod
     def delete(session: str, reset=True, force=False):
-        """delete given session 
+        """delete given session
 
         :param session: session name
         :type session: str
@@ -119,13 +123,14 @@ class session:
     # Create/Delete/Edit
 
     @staticmethod
-    def create(name: str,
-               password: str = "",
-               machines: int = 1,
-               ab_channel: str = "conda-forge",
-               ab_version: str = "latest",
-               force: bool = False,
-               ):
+    def create(
+        name: str,
+        password: str = "",
+        machines: int = 1,
+        ab_channel: str = "conda-forge",
+        ab_version: str = "latest",
+        force: bool = False,
+    ):
         pass
 
     class db:
@@ -133,8 +138,9 @@ class session:
             pass
 
         @staticmethod
-        def add(name: str,
-                ):
+        def add(
+            name: str,
+        ):
             """add new database to session
 
             :param name: database name
@@ -148,7 +154,7 @@ class session:
         @staticmethod
         def remove(name: str):
             """Remove session database
-        
+
             :param name: database name
             :type name: str
             """
@@ -156,13 +162,10 @@ class session:
 
     class plugin:
         def __init__(self):
-            pass       
+            pass
 
         @staticmethod
-        def add(name: str,
-                    channel: str = "conda-forge",
-                    version: str = "latest"
-                    ):
+        def add(name: str, channel: str = "conda-forge", version: str = "latest"):
             pass
             """List session plugins
             """
@@ -171,29 +174,25 @@ class session:
         @staticmethod
         def remove(name: str):
             """Remove session plugin
-        
+
             :param name: database name
             :type name: str
             """
             pass
 
-
     class project:
         def __init__(self):
-            pass       
+            pass
 
         @staticmethod
-        def add(name: str,
-                databases: list[str],
-                plugins: list[str]):
+        def add(name: str, databases: list[str], plugins: list[str]):
             pass
 
         @staticmethod
         def remove(name: str):
             """Remove session project
-        
+
             :param name: database name
             :type name: str
             """
             pass
-

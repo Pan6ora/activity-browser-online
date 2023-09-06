@@ -6,7 +6,7 @@ import pkg_resources
 # ab_online.ab (see help for arguments description)
 
 STORAGE = appdirs.user_data_dir("ActivityBrowserOnline")
-DEBUG   = False
-INCLUDES = pkg_resources.resource_filename(__name__, 'includes')
+DEBUG = False
+INCLUDES = pkg_resources.resource_filename(__name__, "includes")
 DOMAIN = "localhost"
 DEV = False
