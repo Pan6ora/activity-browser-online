@@ -3,7 +3,7 @@ import sys
 
 from .api import API
 from . import config
-from .machine import Machine
+from .controllers import Machine
 
 class Parser(argparse.ArgumentParser):
     """Modified argparse ArgumentParser

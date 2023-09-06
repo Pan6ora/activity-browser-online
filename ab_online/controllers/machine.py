@@ -1,6 +1,6 @@
 import json
-from .session import Session
-from . import config
+from ..session import Session
+from .. import config
 
 class Machine():
     """This class is meant to be used from a machine docker container

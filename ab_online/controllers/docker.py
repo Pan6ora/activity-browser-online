@@ -48,11 +48,6 @@ class Docker:
             pass
 
     @classmethod
-    def update_Caddyfile(cls):
-        print("NOT YET IMPLEMENTED")
-        pass
-
-    @classmethod
     def start_caddy_proxy(cls):
         """start main reverse proxy
         """
@@ -152,7 +147,6 @@ class Docker:
             print("  - build Activity Browser image")
             Docker.build_ab(session.ab_channel, session.ab_version)  
 
-        print(plugins_install)
         buildargs = {
             "plugins_install": plugins_install,
             "session_file": f"sessions/{session.esc_name}.json",

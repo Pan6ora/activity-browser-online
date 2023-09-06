@@ -108,9 +108,6 @@ class Sessions():
         for id in range(session.machines):
             Docker.start_machine(session, id=id)
 
-        print(f"  - update proxy config file")
-        Docker.update_Caddyfile()
-
         print(f"  - start proxy container")
         Docker.stop_proxy()
         Docker.start_caddy_proxy()
