@@ -3,6 +3,9 @@ __pycache__
 # TEMPORARY
 ab_docker
 
+# Sphinx documentation
+docs/build
+
 # Ignore data except demo session
 ab_online/data/sessions/*
 ab_online/data/databases
