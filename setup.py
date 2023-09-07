@@ -40,6 +40,8 @@ setup(
             "ab-online = ab_online:run_ab_online",
         ]
     },
-    package_dir={"": "ab_online"},
-    package_data={"includes": ["*", ".*"]},
+    package_dir={"": "."},
+    package_data={
+        "ab_online": ["includes/*", "includes/config/*", "includes/databases/*"]
+    },
 )
