@@ -4,12 +4,41 @@
     "machines": 1,
     "ab_channel": "conda-forge",
     "ab_version": "2.9.0",
-    "databases": [],
-    "plugins": [],
+    "databases": [
+        {
+            "name": "Biosphere",
+            "filename": "biosphere3.bw2package",
+            "location": "local"
+        },
+        {
+            "name": "Idemat",
+            "filename": "Idemat.bw2package",
+            "location": "local"
+        }
+    ],
+    "plugins": [
+        {
+            "name": "notebook",
+            "ab_channel": "pan6ora",
+            "version": "0.2.7"
+        }
+    ],
     "projects": [
         {
-            "name": "default",
-            "databases": [],
+            "name": "example",
+            "databases": [
+                "Biosphere",
+                "Idemat"
+            ],
+            "plugins": [
+                "notebook"
+            ]
+        },
+        {
+            "name": "second project",
+            "databases": [
+                "Biosphere"
+            ],
             "plugins": []
         }
     ]
