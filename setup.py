@@ -26,7 +26,7 @@ else:
 setup(
     name="ab-online",
     version=version,
-    packages=packages,
+    packages=find_packages(where="ab_online"),
     include_package_data=True,
     author="Rémy Le Calloch",
     author_email="remy@lecalloch.net",
@@ -40,9 +40,6 @@ setup(
             "ab-online = ab_online:run_ab_online",
         ]
     },
-    package_data={
-        "": [
-            "includes",
-        ]
-    },
+    package_dir={"": "ab-online"},
+    package_data={"includes": ["*", ".*"]},
 )
