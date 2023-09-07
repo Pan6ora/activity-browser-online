@@ -9,7 +9,7 @@ ARG setup_command
 
 USER root
 
-RUN micromamba install -y -n base -c conda-forge -c pan6ora activity-browser-online pip
+RUN micromamba install -y -n base -c conda-forge -c pan6ora activity-browser-online
 RUN ${plugins_install}
 RUN micromamba remove -y -n base --force pyside2 qt-main qt-webengine
 RUN micromamba install -y -n base -c conda-forge pyside2=5.15.4 qt-main=5.15.4 qt-webengine=5.15.4
@@ -32,7 +32,6 @@ RUN mkdir -p /home/mambauser/.local/share/Brightway3
 RUN eval "$(micromamba shell hook --shell=bash)" ; \
     micromamba activate base ;  \
     cd /home/mambauser ;        \
-    pip install docker ;        \
     ${setup_command}
 RUN rm -rf /home/mambauser/.local/share/ActivityBrowserOnline
 EXPOSE 5900
