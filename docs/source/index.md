@@ -8,10 +8,10 @@ Launch reproducible [Activity Browser](https://github.com/LCA-ActivityBrowser/ac
 ```{eval-rst}
 .. toctree::
    :maxdepth: 1
-   :caption: Documentation
+   :caption: Introduction
    
-   doc/what.md
-   doc/how.md
+   intro/what.md
+   intro/how.md
 
 .. toctree::
    :maxdepth: 1
@@ -23,9 +23,16 @@ Launch reproducible [Activity Browser](https://github.com/LCA-ActivityBrowser/ac
 
 .. toctree::
    :maxdepth: 1
+   :caption: Documentation
+
+   doc/sessions.md
+
+.. toctree::
+   :maxdepth: 1
    :caption: Code reference
 
    code/api.rst
    code/client.rst
    code/objects.rst
+   code/session_schema.rst
 ```

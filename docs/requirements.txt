@@ -1,5 +1,6 @@
 sphinx
 sphinx-argparse
+sphinx-jsonschema
 myst-parser
 sphinx-rtd-theme
 appdirs

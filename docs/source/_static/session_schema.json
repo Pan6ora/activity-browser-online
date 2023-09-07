@@ -1,0 +1,132 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+        "name": {
+            "description": "Name of the session",
+            "type": "string"
+        },
+        "password": {
+            "description": "The password used to connect to the session",
+            "type": "string"
+        },
+        "machines": {
+            "description": "Number of machines to start",
+            "type": "integer"
+        },
+        "ab_channel": {
+            "description": "Anaconda channel to fetch Activity Browser from",
+            "type": "string"
+        },
+        "ab_version": {
+            "description": "Anaconda Activity Browser version",
+            "type": "string"
+        },
+        "databases": {
+            "description": "list of databases to use",
+            "type": "array",
+            "items": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "description": "database name",
+                            "type": "string"
+                        },
+                        "filename": {
+                            "description": "name of the database file",
+                            "type": "string"
+                        },
+                        "location": {
+                            "description": "location of the file",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "name",
+                        "filename",
+                        "location"
+                    ]
+                }
+            ]
+        },
+        "plugins": {
+            "description": "list of plugins to use",
+            "type": "array",
+            "items": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "description": "plugin name",
+                            "type": "string"
+                        },
+                        "ab_channel": {
+                            "description": "anaconda channel",
+                            "type": "string"
+                        },
+                        "version": {
+                            "description": "anaconda package version",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "name",
+                        "ab_channel",
+                        "version"
+                    ]
+                }
+            ]
+        },
+        "projects": {
+            "description": "list of projects to create",
+            "type": "array",
+            "items": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "description": "project name",
+                            "type": "string"
+                        },
+                        "databases": {
+                            "description": "databases to import",
+                            "type": "array",
+                            "items": [
+                                {
+                                    "description": "plugin name",
+                                    "type": "string"
+                                },
+                            ]
+                        },
+                        "plugins": {
+                            "description": "plugins to activate",
+                            "type": "array",
+                            "items": [
+                                {
+                                    "description": "plugin name",
+                                    "type": "string"
+                                }
+                            ]
+                        }
+                    },
+                    "required": [
+                        "name",
+                        "databases",
+                        "plugins"
+                    ]
+                }
+            ]
+        }
+    },
+    "required": [
+        "name",
+        "password",
+        "machines",
+        "ab_channel",
+        "ab_version",
+        "databases",
+        "plugins",
+        "projects"
+    ]
+}
