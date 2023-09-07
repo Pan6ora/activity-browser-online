@@ -1,16 +1,16 @@
 {
-    "name"       : "example",
-    "password"   : "azerty",
-    "machines"   :  1,
-    "ab_channel" : "pan6ora",  
-    "ab_version" : "2.7.5+pm1.0.3",
+    "name": "example",
+    "password": "azerty",
+    "machines": 1,
+    "ab_channel": "conda-forge",
+    "ab_version": "2.9.0",
     "databases": [],
     "plugins": [],
     "projects": [
-        { 
-            "name" : "default",
-            "databases" : [],
-            "plugins"   : []
+        {
+            "name": "default",
+            "databases": [],
+            "plugins": []
         }
     ]
 }
