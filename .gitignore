@@ -1,16 +1,7 @@
 __pycache__
 
-# TEMPORARY
-ab_docker
-
 # Sphinx documentation
 docs/build
 
-# Ignore data except demo session
-ab_online/data/sessions/*
-ab_online/data/databases
-ab_online/data/plugins
-!ab_online/data/sessions/example.json
-
-# Ignore sessions storage
-ab_online/storage
+# Ignore local build files
+ab_online.egg-info
