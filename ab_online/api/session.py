@@ -42,7 +42,6 @@ class session:
         :type reset: bool, optional
         :raises TypeError: no session provided
         """
-        CONFIG.DEV = True
         if CONFIG.SERVER_MODE:
             all = request.args.get("all", default=False, type=bool)
             force = request.args.get("force", default=False, type=bool)
