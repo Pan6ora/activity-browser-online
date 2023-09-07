@@ -1,11 +1,25 @@
-from ..controllers import *
+from flask import jsonify
+
+from ..controllers import Sessions, Storage
 
 
 class session:
-    def __init__(self):
-        pass
-
     # Start/Stop
+
+    @staticmethod
+    def list_sessions(config=False, storage=False, state=False, running=False):
+        """list existing sessions
+
+        :param config: show sessions configuration, defaults to False
+        :type config: bool, optional
+        :param storage: show sessions data infos, defaults to False
+        :type storage: bool, optional
+        :param state: show running state, defaults to False
+        :type state: bool, optional
+        :param running: show only running sessions, defaults to False
+        :type running: bool, optional
+        """
+        return jsonify([s.esc_name for s in Sessions.sessions.values()])
 
     @staticmethod
     def start(sessions: list[str], all=False, force=False, build=True, reset=False):
@@ -26,12 +40,11 @@ class session:
         if sessions is None and not all:
             raise TypeError("at least one session name must be provided")
         if all:
-            [
-                Sessions.start_session(s, force, build, reset)
-                for s in Sessions.sessions.values()
-            ]
+            for session in Sessions.sessions.values():
+                Sessions.start_session(session, force, build, reset)
         else:
-            [Sessions.start_session(s, force, build, reset) for s in sessions]
+            for session in sessions:
+                Sessions.start_session(session, force, build, reset)
 
     @staticmethod
     def stop(sessions: list[str], all=False, reset=False):
@@ -48,9 +61,11 @@ class session:
         if sessions is None and not all:
             raise TypeError("at least one session name must be provided")
         if all:
-            [Sessions.stop_session(s, reset) for s in Sessions.sessions.values()]
+            for session in Sessions.sessions.values():
+                Sessions.stop_session(session, reset)
         else:
-            [Sessions.stop_session(s, reset) for s in sessions]
+            for session in sessions:
+                Sessions.stop_session(session, reset)
 
     # Divers
 
@@ -64,9 +79,11 @@ class session:
         :type all: bool, optional
         """
         if all:
-            [Sessions.build_session(s) for s in Sessions.sessions.values()]
+            for session in Sessions.sessions.values():
+                Sessions.build_session(session)
         else:
-            [Sessions.build_session(s) for s in sessions]
+            for session in sessions:
+                Sessions.build_session(session)
 
     @staticmethod
     def reset(sessions: list[str], all=False):
@@ -77,20 +94,29 @@ class session:
         :param all: reset all sessions, defaults to False
         :type all: bool, optional
         """
-        pass
+        if all:
+            for session in Sessions.sessions.values():
+                Storage.delete_folder(f"sessions_storage/{session}")
+        else:
+            for session in sessions:
+                Storage.delete_folder(f"sessions_storage/{session}")
 
     @staticmethod
-    def delete(session: str, reset=True, force=False):
+    def delete(session_name: str, reset=True, force=False):
         """delete given session
 
-        :param session: session name
-        :type session: str
+        :param session_name: session name
+        :type session_name: str
         :param reset: delete session data, defaults to True
         :type reset: bool, optional
         :param force: delete even if running, defaults to False
         :type force: bool, optional
         """
-        pass
+        session = Sessions.sessions[session_name]
+        if Sessions.is_running(session):
+            Sessions.stop_session(session, reset_storage=True)
+        Storage.delete_file(f"sessions/{session.esc_name}")
+        Sessions.delete_storage(session)
 
     @staticmethod
     def export_json(session: str, stdout=False, file=None):
@@ -119,80 +145,3 @@ class session:
         :type force: bool, optional
         """
         pass
-
-    # Create/Delete/Edit
-
-    @staticmethod
-    def create(
-        name: str,
-        password: str = "",
-        machines: int = 1,
-        ab_channel: str = "conda-forge",
-        ab_version: str = "latest",
-        force: bool = False,
-    ):
-        pass
-
-    class db:
-        def __init__(self):
-            pass
-
-        @staticmethod
-        def add(
-            name: str,
-        ):
-            """add new database to session
-
-            :param name: database name
-            :type name: str
-            """
-            pass
-            """List session databases
-            """
-            pass
-
-        @staticmethod
-        def remove(name: str):
-            """Remove session database
-
-            :param name: database name
-            :type name: str
-            """
-            pass
-
-    class plugin:
-        def __init__(self):
-            pass
-
-        @staticmethod
-        def add(name: str, channel: str = "conda-forge", version: str = "latest"):
-            pass
-            """List session plugins
-            """
-            pass
-
-        @staticmethod
-        def remove(name: str):
-            """Remove session plugin
-
-            :param name: database name
-            :type name: str
-            """
-            pass
-
-    class project:
-        def __init__(self):
-            pass
-
-        @staticmethod
-        def add(name: str, databases: list[str], plugins: list[str]):
-            pass
-
-        @staticmethod
-        def remove(name: str):
-            """Remove session project
-
-            :param name: database name
-            :type name: str
-            """
-            pass

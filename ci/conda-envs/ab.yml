@@ -2,6 +2,8 @@ name: ab
 channels:
   - conda-forge
 dependencies:
+  - flask
   - appdirs
+  - werkzeug
   - pip:
     - docker

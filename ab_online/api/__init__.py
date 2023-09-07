@@ -1,37 +1,39 @@
+import flask
+from flask import request
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 from ..controllers import *
+from .. import config
+
+
+class WebAPI:
+    def __init__(self):
+        self.app = flask.Flask(__name__)
+        self.app.config["DEBUG"] = config.DEBUG
+        self.app.wsgi_app = ProxyFix(
+            self.app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+        )
+
+        @self.app.route("/", methods=["GET"])
+        def home():
+            return """<h1>Welcome to Activity Browser Online API</h1>
+            <p>See documentation on readthedocs to learn about AB Online and this API</p>"""
+
+    def run(self):
+        self.app.run()
 
 
 class API:
     from .session import session
     from .db import db
 
-    def __init__(self):
-        pass
+    web_api = WebAPI()
+    app = web_api.app
 
-    def validate_file(self, file):
-        """perform checks on a session file"""
-        pass
+    @classmethod
+    def run_server(cls):
+        Sessions.start_proxy()
+        cls.web_api.run()
 
-    @staticmethod
-    def list_sessions(config=False, storage=False, state=False, running=False):
-        """list existing sessions
-
-        :param config: show sessions configuration, defaults to False
-        :type config: bool, optional
-        :param storage: show sessions data infos, defaults to False
-        :type storage: bool, optional
-        :param state: show running state, defaults to False
-        :type state: bool, optional
-        :param running: show only running sessions, defaults to False
-        :type running: bool, optional
-        """
-        return [s.esc_name for s in Sessions.sessions.values()]
-
-    @staticmethod
-    def list_databases(verbose=False):
-        """list existing databases
-
-        :param verbose: show infos about database, defaults to False
-        :type verbose: bool, optional
-        """
-        return Storage.list_files("databases", extension=False)
+    app.route("/api/v1/sessions/list", methods=["GET"])(session.list_sessions)
+    app.route("/api/v1/databases/list", methods=["GET"])(db.list_databases)

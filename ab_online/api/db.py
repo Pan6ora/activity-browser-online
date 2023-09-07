@@ -3,6 +3,15 @@ from ..controllers import Storage
 
 class db:
     @staticmethod
+    def list_databases(verbose=False):
+        """list existing databases
+
+        :param verbose: show infos about database, defaults to False
+        :type verbose: bool, optional
+        """
+        return Storage.list_files("databases", extension=False)
+
+    @staticmethod
     def add(
         file: str,
         name: str,

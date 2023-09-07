@@ -89,7 +89,7 @@ class Client:
         ps = subparsers.add_parser(
             "list", aliases=["ps"], description="List sessions.", help="list sessions"
         )
-        ps.set_defaults(func=self.api.list_sessions)
+        ps.set_defaults(func=self.api.session.list_sessions)
         ps.add_argument(
             "-r", "--running", action="store_true", help="print only running sessions"
         )
@@ -97,6 +97,7 @@ class Client:
         server = subparsers.add_parser(
             "server", description="Start http API server", help="start http API server"
         )
+        server.set_defaults(func=self.api.run_server)
         setup = subparsers.add_parser(
             "setup",
             description="Setup AB inside a machine",

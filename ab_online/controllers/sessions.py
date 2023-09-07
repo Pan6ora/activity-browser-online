@@ -91,28 +91,28 @@ class Sessions:
             print("  - build session image")
             Docker.build_session(session)
 
-        print(f"  - create storage")
+        print("  - create storage")
         cls.create_storage(session, reset_storage)
 
-        print(f"  - create tokens")
+        print("  - create tokens")
         cls.generate_tokens_file(session)
 
-        print(f"  - create home")
+        print("  - create home")
         cls.generate_session_home(session)
 
-        print(f"  - create main network")
+        print("  - create main network")
         Docker.client.networks.create("ABonline")
 
-        print(f"  - start novnc container")
+        print("  - start novnc container")
         Docker.start_novnc_gate(session)
 
         print(f"  - start {session.machines} containers from image {session.tag}")
         for id in range(session.machines):
             Docker.start_machine(session, id=id)
 
-        print(f"  - start proxy container")
+        print("  - start proxy container")
         Docker.stop_proxy()
-        Docker.start_caddy_proxy()
+        cls.start_proxy()
 
         cls.set_running_sessions()
         Docker.reload_caddyfile()
@@ -124,6 +124,15 @@ class Sessions:
         Docker.stop_proxy()
         print("  - remove main network")
         Docker.remove_main_network()
+
+    @classmethod
+    def start_proxy(cls):
+        cls.generate_caddyfile()
+        Docker.client.networks.create("ABonline")
+        try:
+            Docker.start_caddy_proxy()
+        except:
+            Docker.reload_caddyfile()
 
     @classmethod
     def stop_session(cls, session, reset_storage=False):
@@ -209,6 +218,9 @@ class Sessions:
                     f"{config.DOMAIN} \u007b \n",
                     "root * /home/home  \n",
                     "file_server browse \n",
+                    "}                 \n",
+                    f"api.{config.DOMAIN} \u007b \n",
+                    "reverse_proxy localhost:5000 \n",
                     "}                 \n",
                 ]
             )
