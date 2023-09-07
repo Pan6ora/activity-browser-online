@@ -72,6 +72,9 @@ class Storage:
         cls.create_folder("databases")
         cls.create_folder("sessions_storage")
         cls.create_folder("proxy")
+        cls.create_folder("local_code")
+        cls.create_folder("local_code/ab_online")
+        cls.add_file(f"{config.INCLUDES}/httpd.conf", "run-ab-online.py", "local_code")
         cls.add_file(
             f"{config.INCLUDES}/example_session.json", "example.json", "sessions"
         )
