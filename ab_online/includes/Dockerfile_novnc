@@ -1,12 +1,10 @@
-FROM mambaorg/micromamba:alpine
+FROM alpine:latest
 
 USER root
 
+RUN apk --update --upgrade add sudo
 RUN apk --update --upgrade --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/ add \
         novnc   \
-        websockify
-
-RUN micromamba install -y -n base -c conda-forge \
         websockify
 
 RUN mkdir /root/storage
@@ -14,7 +12,7 @@ RUN mkdir /root/storage
 EXPOSE 8080
 
 CMD ["websockify", "--verbose", \
-     "--web", "/usr/share/novnc", \
-     "--token-plugin", "TokenFile", \
-     "--token-source", "/root/storage/token.list", \
-     "8080"]
+        "--web", "/usr/share/novnc", \
+        "--token-plugin", "TokenFile", \
+        "--token-source", "/root/storage/token.list", \
+        "8080"]
