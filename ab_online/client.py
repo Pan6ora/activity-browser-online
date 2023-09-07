@@ -104,7 +104,7 @@ class Client:
             help="setup AB inside a machine",
         )
         setup.set_defaults(func=Machine.setup_session)
-        setup.add_argument("session_file", nargs="+", default="", help="a session file")
+        setup.add_argument("session_file", nargs="?", default="", help="a session file")
         return parser
 
     def run(self, args, debug=True):
