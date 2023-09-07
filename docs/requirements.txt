@@ -4,3 +4,4 @@ myst-parser
 sphinx-rtd-theme
 appdirs
 docker
+flask
