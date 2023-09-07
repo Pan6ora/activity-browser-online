@@ -1,11 +1,11 @@
-from .. import config
+from .. import config as CONFIG
 from .storage import Storage
 from .docker import Docker
 from ..session import Session
 
 
 class Sessions:
-    storage_path = f"{config.STORAGE}/sessions_storage"
+    storage_path = f"{CONFIG.STORAGE}/sessions_storage"
     running_sessions = []
     sessions = {}
 
@@ -16,7 +16,7 @@ class Sessions:
         """
         sessions = {}
         for file in Storage.list_files("sessions"):
-            session = Session(f"{config.STORAGE}/sessions/{file}")
+            session = Session(f"{CONFIG.STORAGE}/sessions/{file}")
             sessions[session.esc_name] = session
             cls.create_storage(session)
         cls.sessions = sessions
@@ -168,7 +168,7 @@ class Sessions:
         Storage.create_folder(f"sessions_storage/{session.esc_name}/databases")
         for db in session.databases.values():
             Storage.add_file(
-                f"{config.STORAGE}/databases/{db.filename}",
+                f"{CONFIG.STORAGE}/databases/{db.filename}",
                 db.filename,
                 f"sessions_storage/{session.esc_name}/databases",
                 link=True,
@@ -193,10 +193,10 @@ class Sessions:
         ) as file:
             for i in range(session.machines):
                 file.write(
-                    f'<a href="https://{session.esc_name}.{config.DOMAIN}/vnc.html?resize=remote&amp;path=novnc/websockify?token={i}">Machine n°{i}</a><br>\n'
+                    f'<a href="https://{session.esc_name}.{CONFIG.DOMAIN}/vnc.html?resize=remote&amp;path=novnc/websockify?token={i}">Machine n°{i}</a><br>\n'
                 )
         Storage.add_file(
-            f"{config.INCLUDES}/httpd.conf",
+            f"{CONFIG.INCLUDES}/httpd.conf",
             "httpd.conf",
             f"sessions_storage/{session.esc_name}/home",
         )
@@ -204,22 +204,22 @@ class Sessions:
     @classmethod
     def generate_main_home(cls):
         Storage.create_folder("proxy/static")
-        with open(f"{config.STORAGE}/proxy/static/index.html", "w") as file:
+        with open(f"{CONFIG.STORAGE}/proxy/static/index.html", "w") as file:
             for session in cls.running_sessions:
                 file.write(
-                    f'<a href="https://home.{session.esc_name}.{config.DOMAIN}">{session.name}</a><br>\n'
+                    f'<a href="https://home.{session.esc_name}.{CONFIG.DOMAIN}">{session.name}</a><br>\n'
                 )
 
     @classmethod
     def generate_caddyfile(cls):
-        with open(f"{config.STORAGE}/proxy/Caddyfile", "w") as file:
+        with open(f"{CONFIG.STORAGE}/proxy/Caddyfile", "w") as file:
             file.writelines(
                 [
-                    f"{config.DOMAIN} \u007b \n",
+                    f"{CONFIG.DOMAIN} \u007b \n",
                     "root * /home/home  \n",
                     "file_server browse \n",
                     "}                 \n",
-                    f"api.{config.DOMAIN} \u007b \n",
+                    f"api.{CONFIG.DOMAIN} \u007b \n",
                     "reverse_proxy localhost:5000 \n",
                     "}                 \n",
                 ]
@@ -227,14 +227,14 @@ class Sessions:
             for session in cls.running_sessions:
                 file.writelines(
                     [
-                        f"{session.esc_name}.{config.DOMAIN} \u007b\n",
+                        f"{session.esc_name}.{CONFIG.DOMAIN} \u007b\n",
                         f"reverse_proxy {session.esc_name}-gate:8080\n",
                         "}\n",
                     ]
                 )
                 file.writelines(
                     [
-                        f"home.{session.esc_name}.{config.DOMAIN} \u007b\n",
+                        f"home.{session.esc_name}.{CONFIG.DOMAIN} \u007b\n",
                         f"root * /home/storage/{session.esc_name}/home\n",
                         "file_server browse\n",
                         "}\n",

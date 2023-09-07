@@ -1,6 +1,6 @@
 import json
 from ..session import Session
-from .. import config
+from .. import config as CONFIG
 
 
 class Machine:
@@ -21,7 +21,7 @@ class Machine:
             # add databases
             for database in project.databases:
                 filename = session.databases[database].filename
-                BW2Package().import_file(f"{config.STORAGE}/databases/{filename}")
+                BW2Package().import_file(f"{CONFIG.STORAGE}/databases/{filename}")
             # add plugins and databases to AB settings
             settings = {}
             settings["plugins_list"] = []

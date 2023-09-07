@@ -2,7 +2,7 @@ import argparse
 import sys
 
 from .api import API
-from . import config
+from . import config as CONFIG
 from .controllers import Machine
 
 
@@ -60,7 +60,7 @@ class Client:
             action="store_true",
             help="delete session containers storage",
         )
-        start.add_argument("sessions", nargs="*", help="session(s) name(s)")
+        start.add_argument("session", nargs="?", help="session name")
 
         build = subparsers.add_parser(
             "build", description="Build session(s).", help="build session(s)"
@@ -112,18 +112,18 @@ class Client:
         func = args.__dict__.pop("func")
 
         # manage global settings
-        config.DEBUG = args.__dict__.pop("debug")
+        CONFIG.DEBUG = args.__dict__.pop("debug")
         storage = args.__dict__.pop("storage")
         dev = args.__dict__.pop("dev")
         if storage:
-            config.STORAGE = True
+            CONFIG.STORAGE = True
         if dev:
-            config.DEV = True
+            CONFIG.DEV = True
 
         # execute command
-        if config.DEBUG:
+        if CONFIG.DEBUG:
             print("Debug mode")
-            print(f"Storage path: {config.STORAGE}\n")
+            print(f"Storage path: {CONFIG.STORAGE}\n")
             result = func(**vars(args))
             self.pretty_print(result)
         else:

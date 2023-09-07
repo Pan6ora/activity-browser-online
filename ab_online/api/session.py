@@ -1,6 +1,7 @@
-from flask import jsonify
+from flask import jsonify, request
 
 from ..controllers import Sessions, Storage
+from .. import config as CONFIG
 
 
 class session:
@@ -19,14 +20,18 @@ class session:
         :param running: show only running sessions, defaults to False
         :type running: bool, optional
         """
-        return jsonify([s.esc_name for s in Sessions.sessions.values()])
+        sessions = [s for s in Sessions.sessions.keys()]
+        if CONFIG.SERVER_MODE:
+            return jsonify(sessions)
+        else:
+            return sessions
 
     @staticmethod
-    def start(sessions: list[str], all=False, force=False, build=True, reset=False):
+    def start(session: str, all=False, force=False, build=True, reset=False):
         """start session(s)
 
         :param sessions: a list of sessions names
-        :type sessions: list[str]
+        :type sessions: str
         :param all: start all sessions, defaults to False
         :type all: bool, optional
         :param force: restart if already started, defaults to False
@@ -37,14 +42,21 @@ class session:
         :type reset: bool, optional
         :raises TypeError: no session provided
         """
-        if sessions is None and not all:
+        CONFIG.DEV = True
+        if CONFIG.SERVER_MODE:
+            all = request.args.get("all", default=False, type=bool)
+            force = request.args.get("force", default=False, type=bool)
+            build = request.args.get("build", default=True, type=bool)
+            reset = request.args.get("reset", default=False, type=bool)
+        if session is None and not all:
             raise TypeError("at least one session name must be provided")
         if all:
             for session in Sessions.sessions.values():
                 Sessions.start_session(session, force, build, reset)
         else:
-            for session in sessions:
-                Sessions.start_session(session, force, build, reset)
+            Sessions.start_session(session, force, build, reset)
+        if CONFIG.SERVER_MODE:
+            return jsonify("OK")
 
     @staticmethod
     def stop(sessions: list[str], all=False, reset=False):

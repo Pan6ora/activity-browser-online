@@ -3,21 +3,21 @@ import pkg_resources
 import shutil
 import json
 
-from .. import config
+from .. import config as CONFIG
 
 
 class Storage:
     @classmethod
     def create_folder(cls, path):
-        os.makedirs(f"{config.STORAGE}/{path}", exist_ok=True)
+        os.makedirs(f"{CONFIG.STORAGE}/{path}", exist_ok=True)
 
     @classmethod
     def delete_folder(cls, path):
-        shutil.rmtree(f"{config.STORAGE}/{path}", ignore_errors=True)
+        shutil.rmtree(f"{CONFIG.STORAGE}/{path}", ignore_errors=True)
 
     @classmethod
     def delete_file(cls, path):
-        os.remove(f"{config.STORAGE}/{path}")
+        os.remove(f"{CONFIG.STORAGE}/{path}")
 
     @classmethod
     def add_file(cls, file, name, folder="", force=False, link=False):
@@ -32,7 +32,7 @@ class Storage:
         :param link: create a link instead of copying, defaults to False
         :type link: bool, optional
         """
-        dest = f"{config.STORAGE}/{folder}/{name}"
+        dest = f"{CONFIG.STORAGE}/{folder}/{name}"
         if force or not os.path.isfile(dest):
             if not link:
                 shutil.copyfile(file, dest)
@@ -48,7 +48,7 @@ class Storage:
         :param extension: show files extension, defaults to False
         :type extension: bool, optional
         """
-        path = f"{config.STORAGE}/{folder}"
+        path = f"{CONFIG.STORAGE}/{folder}"
         if extension:
             return os.listdir(path)
         else:
@@ -74,23 +74,23 @@ class Storage:
         cls.create_folder("proxy")
         cls.create_folder("local_code")
         cls.create_folder("local_code/ab_online")
-        cls.add_file(f"{config.INCLUDES}/httpd.conf", "run-ab-online.py", "local_code")
+        cls.add_file(f"{CONFIG.INCLUDES}/httpd.conf", "run-ab-online.py", "local_code")
         cls.add_file(
-            f"{config.INCLUDES}/example_session.json", "example.json", "sessions"
+            f"{CONFIG.INCLUDES}/example_session.json", "example.json", "sessions"
         )
-        cls.add_file(f"{config.INCLUDES}/.dockerignore", ".dockerignore", "")
+        cls.add_file(f"{CONFIG.INCLUDES}/.dockerignore", ".dockerignore", "")
         cls.add_file(
-            f"{config.INCLUDES}/databases/biosphere3.bw2package",
+            f"{CONFIG.INCLUDES}/databases/biosphere3.bw2package",
             "biosphere3.bw2package",
             "databases",
         )
         cls.add_file(
-            f"{config.INCLUDES}/databases/Idemat.bw2package",
+            f"{CONFIG.INCLUDES}/databases/Idemat.bw2package",
             "Idemat.bw2package",
             "databases",
         )
         cls.add_file(
-            f"{config.INCLUDES}/Dockerfile_machine",
+            f"{CONFIG.INCLUDES}/Dockerfile_machine",
             "Dockerfile_machine",
             "",
             force=True,

@@ -4,12 +4,12 @@ import shutil
 import docker
 
 from ..session import Session
-from .. import config
+from .. import config as CONFIG
 from .storage import Storage
 
 
 class Docker:
-    storage_path = f"{config.STORAGE}/sessions_storage"
+    storage_path = f"{CONFIG.STORAGE}/sessions_storage"
     try:
         client = docker.from_env()
     except:
@@ -53,8 +53,8 @@ class Docker:
         Storage.create_folder("proxy/data")
         Storage.create_folder("proxy/storage")
         Storage.create_folder("proxy/static")
-        Storage.add_file(f"{config.INCLUDES}/Caddyfile", "Caddyfile", "proxy")
-        Storage.add_file(f"{config.INCLUDES}/index.html", "index.html", "proxy/static")
+        Storage.add_file(f"{CONFIG.INCLUDES}/Caddyfile", "Caddyfile", "proxy")
+        Storage.add_file(f"{CONFIG.INCLUDES}/index.html", "index.html", "proxy/static")
         proxy = cls.client.containers.run(
             "androw/caddy-security:latest",
             detach=True,
@@ -62,14 +62,14 @@ class Docker:
             name="proxy",
             hostname="proxy",
             volumes={
-                f"{config.STORAGE}/proxy/data": {"bind": "/data", "mode": "rw"},
-                f"{config.STORAGE}/proxy/storage": {"bind": "/storage", "mode": "rw"},
-                f"{config.STORAGE}/proxy/Caddyfile": {
+                f"{CONFIG.STORAGE}/proxy/data": {"bind": "/data", "mode": "rw"},
+                f"{CONFIG.STORAGE}/proxy/storage": {"bind": "/storage", "mode": "rw"},
+                f"{CONFIG.STORAGE}/proxy/Caddyfile": {
                     "bind": "/etc/caddy/Caddyfile",
                     "mode": "ro",
                 },
-                f"{config.STORAGE}/proxy/static": {"bind": "/home/home", "mode": "ro"},
-                f"{config.STORAGE}/sessions_storage": {
+                f"{CONFIG.STORAGE}/proxy/static": {"bind": "/home/home", "mode": "ro"},
+                f"{CONFIG.STORAGE}/sessions_storage": {
                     "bind": "/home/storage",
                     "mode": "ro",
                 },
@@ -149,10 +149,10 @@ class Docker:
                 plugins_list += f" ab-plugin-{plugin.name}"
         plugins_install += f" -c conda-forge {plugins_list}"
 
-        if config.DEV:
+        if CONFIG.DEV:
             setup_command = "python run-ab-online.py setup session.json"
             Storage.delete_folder("local_code")
-            shutil.copytree(f"{config.INCLUDES}/../..", f"{config.STORAGE}/local_code")
+            shutil.copytree(f"{CONFIG.INCLUDES}/../..", f"{CONFIG.STORAGE}/local_code")
         else:
             setup_command = "ab-online setup session.json"
 
@@ -171,7 +171,7 @@ class Docker:
             "setup_command": setup_command,
         }
         image, build_logs = cls.client.images.build(
-            path=config.STORAGE,
+            path=CONFIG.STORAGE,
             dockerfile=f"Dockerfile_machine",
             buildargs=buildargs,
             tag=session.tag,
@@ -180,8 +180,7 @@ class Docker:
         )
         cls.log_docker_output(build_logs)
 
-        if config.DEV:
-            Storage.delete_folder("local_code")
+        Storage.delete_folder("local_code")
 
     @classmethod
     def log_docker_output(
@@ -212,7 +211,7 @@ class Docker:
         tag = f"ab_online/{channel}:{version.replace('+','')}"
         buildargs = {"ab_channel": channel, "ab_version": version}
         cls.client.images.build(
-            path=config.INCLUDES,
+            path=CONFIG.INCLUDES,
             dockerfile="Dockerfile_ab",
             buildargs=buildargs,
             tag=tag,
@@ -226,7 +225,7 @@ class Docker:
         """create the novnc image"""
         tag = "ab_online/novnc:latest"
         cls.client.images.build(
-            path=config.INCLUDES,
+            path=CONFIG.INCLUDES,
             dockerfile="Dockerfile_novnc",
             tag=tag,
             rm=True,
