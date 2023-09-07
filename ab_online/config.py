@@ -5,8 +5,11 @@ import pkg_resources
 # They can be changed using global arguments when running
 # ab_online.ab (see help for arguments description)
 
-STORAGE = appdirs.user_data_dir("ActivityBrowserOnline")
-DEBUG = False
-INCLUDES = pkg_resources.resource_filename(__name__, "includes")
-DOMAIN = "localhost"
-DEV = False
+STORAGE = appdirs.user_data_dir("ActivityBrowserOnline")  # app storage location
+DEBUG = False  # print debug logs
+INCLUDES = pkg_resources.resource_filename(
+    __name__, "includes"
+)  # app includes location
+DOMAIN = "localhost"  # web url
+DEV = False  # use current folder code instead of ab-online app when building docker
+SERVER_MODE = False  # used in the API
