@@ -2,8 +2,4 @@ name: ab
 channels:
   - conda-forge
 dependencies:
-  - flask
-  - appdirs
-  - werkzeug
-  - pip:
-    - docker
+  - activity-browser-online

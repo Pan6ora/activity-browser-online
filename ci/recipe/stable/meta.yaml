@@ -16,6 +16,12 @@ requirements:
     - python =3.9
     - setuptools
     - conda-verify
+  run:
+  - flask
+  - appdirs
+  - werkzeug
+  - pip:
+    - docker
 
 about:
   home: https://github.com/Pan6ora/activity-browser-online
