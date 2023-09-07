@@ -4,11 +4,11 @@ API
 Display and manage sessions
 
 
-.. autoclass:: ab_online.api.API
+.. autoclass:: ab_online.API
     :members:
 
-.. autoclass:: ab_online.api.API.session
+.. autoclass:: ab_online.API.session
     :members:
 
-.. autoclass:: ab_online.api.API.db
+.. autoclass:: ab_online.API.db
     :members:
