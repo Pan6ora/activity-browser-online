@@ -10,10 +10,13 @@ from .storage import Storage
 
 class Docker:
     storage_path = f"{CONFIG.STORAGE}/sessions_storage"
-    try:
+    if CONFIG.DEBUG:
         client = docker.from_env()
-    except:
-        print("Warning: unable to connect to docker API")
+    else:
+        try:
+            client = docker.from_env()
+        except:
+            print("Warning: unable to connect to docker API")
 
     @classmethod
     def stop_containers(cls, session):
