@@ -37,7 +37,10 @@ class Storage:
             if not link:
                 shutil.copyfile(file, dest)
             else:
-                cls.delete_file(f"{folder}/{name}")
+                try:
+                    cls.delete_file(f"{folder}/{name}")
+                except:
+                    pass
                 os.symlink(file, dest)
 
     @classmethod
