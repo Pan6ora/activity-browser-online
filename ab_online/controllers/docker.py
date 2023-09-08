@@ -178,7 +178,8 @@ class Docker:
             rm=True,
             forcerm=True,
         )
-        cls.log_docker_output(build_logs)
+        if CONFIG.DEBUG:
+            cls.log_docker_output(build_logs)
 
         Storage.delete_folder("local_code")
 
