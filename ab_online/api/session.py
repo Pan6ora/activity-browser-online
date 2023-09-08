@@ -143,7 +143,7 @@ class session:
         pass
 
     @staticmethod
-    def import_json(session: str, stdin=False, file=None, force=False):
+    def import_json(name: str, stdin=False, file=None, force=False):
         """import session from json
 
         :param session: name of the session
@@ -155,4 +155,10 @@ class session:
         :param force: if session already exist replace it, defaults to False
         :type force: bool, optional
         """
-        pass
+        if file:
+            esc_name = name.replace(" ", "_").lower()
+            Storage.add_file(file,f"{esc_name}.json","sessions",force)
+        elif stdin:
+            print("import from stdin is not yet supported")
+        else:
+            print("Error: file or stdin must be provided")

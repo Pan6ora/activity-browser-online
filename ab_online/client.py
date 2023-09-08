@@ -86,6 +86,16 @@ class Client:
         )
         stop.add_argument("sessions", nargs="*", default="", help="session(s) name")
 
+        add = subparsers.add_parser(
+            "add", description="Add session file.", help="add session"
+        )
+        add.set_defaults(func=self.api.session.import_json)
+        add.add_argument(
+            "-f", "--force", action="store_true", help="restart if already started"
+        )
+        add.add_argument("-n", "--name", nargs="?", default="", help="session name", required=True)
+        add.add_argument("file", nargs="?", default="", help="session file")
+
         ps = subparsers.add_parser(
             "list", aliases=["ps"], description="List sessions.", help="list sessions"
         )
