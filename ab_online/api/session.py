@@ -8,7 +8,7 @@ class session:
     # Start/Stop
 
     @staticmethod
-    def list_sessions(config=False, storage=False, state=False, running=False):
+    def list(config=False, storage=False, state=False, running=False):
         """list existing sessions
 
         :param config: show sessions configuration, defaults to False
@@ -20,7 +20,17 @@ class session:
         :param running: show only running sessions, defaults to False
         :type running: bool, optional
         """
-        sessions = [s for s in Sessions.sessions.keys()]
+        if CONFIG.SERVER_MODE:
+            config = request.args.get("config", default=False, type=bool)
+            storage = request.args.get("storage", default=False, type=bool)
+            state = request.args.get("state", default=False, type=bool)
+            running = request.args.get("running", default=False, type=bool)
+        if running:
+            sessions = [
+                s.esc_name for s in Sessions.sessions.values() if Sessions.is_running(s)
+            ]
+        else:
+            sessions = [s.esc_name for s in Sessions.sessions.values()]
         if CONFIG.SERVER_MODE:
             return jsonify(sessions)
         else:
@@ -28,10 +38,10 @@ class session:
 
     @staticmethod
     def start(session: str, all=False, force=False, build=True, reset=False):
-        """start session(s)
+        """start session
 
-        :param sessions: a list of sessions names
-        :type sessions: str
+        :param session: session
+        :type session: str
         :param all: start all sessions, defaults to False
         :type all: bool, optional
         :param force: restart if already started, defaults to False
@@ -58,76 +68,83 @@ class session:
             return jsonify("OK")
 
     @staticmethod
-    def stop(sessions: list[str], all=False, reset=False):
-        """stop session(s) if running
+    def stop(session: str, all=False, reset=False):
+        """stop session if running
 
-        :param sessions: a list of sessions names
-        :type sessions: list[str]
+        :param session: session
+        :type session: str
         :param all: stop all running sessions, defaults to False
         :type all: bool, optional
-        :param reset: delete sessions data, defaults to False
+        :param reset: delete session data, defaults to False
         :type reset: bool, optional
         :raises TypeError: no session provided
         """
-        if sessions is None and not all:
+        if CONFIG.SERVER_MODE:
+            all = request.args.get("all", default=False, type=bool)
+            reset = request.args.get("reset", default=False, type=bool)
+        if session is None and not all:
             raise TypeError("at least one session name must be provided")
         if all:
             for session in Sessions.sessions.values():
                 Sessions.stop_session(session, reset)
         else:
-            for session in sessions:
-                Sessions.stop_session(session, reset)
+            Sessions.stop_session(session, reset)
 
     # Divers
 
     @staticmethod
-    def build(sessions: list[str], all=False):
-        """build session(s) docker image
+    def build(session: str, all=False):
+        """build session docker image
 
-        :param sessions: a list of sessions names
-        :type sessions: list[str]
+        :param session: session
+        :type session: str
         :param all: build all sessions, defaults to False
         :type all: bool, optional
         """
+        if CONFIG.SERVER_MODE:
+            all = request.args.get("all", default=False, type=bool)
         if all:
             for session in Sessions.sessions.values():
                 Sessions.build_session(session)
         else:
-            for session in sessions:
-                Sessions.build_session(session)
+            Sessions.build_session(session)
 
     @staticmethod
-    def reset(sessions: list[str], all=False):
+    def reset(session: str, all=False):
         """delete sessions data
 
-        :param sessions: a list of sessions names
-        :type sessions: list[str]
+        :param session: session
+        :type session: str
         :param all: reset all sessions, defaults to False
         :type all: bool, optional
         """
+        if CONFIG.SERVER_MODE:
+            all = request.args.get("all", default=False, type=bool)
         if all:
             for session in Sessions.sessions.values():
                 Storage.delete_folder(f"sessions_storage/{session}")
         else:
-            for session in sessions:
-                Storage.delete_folder(f"sessions_storage/{session}")
+            Storage.delete_folder(f"sessions_storage/{session}")
 
     @staticmethod
-    def delete(session_name: str, reset=True, force=False):
+    def delete(session: str, reset=True, force=False):
         """delete given session
 
-        :param session_name: session name
-        :type session_name: str
+        :param session: session
+        :type session: str
         :param reset: delete session data, defaults to True
         :type reset: bool, optional
         :param force: delete even if running, defaults to False
         :type force: bool, optional
         """
-        session = Sessions.sessions[session_name]
-        if Sessions.is_running(session):
-            Sessions.stop_session(session, reset_storage=True)
+        if CONFIG.SERVER_MODE:
+            reset = request.args.get("reset", default=False, type=bool)
+            force = request.args.get("force", default=False, type=bool)
+        session_obj = Sessions.sessions[session]
+        if Sessions.is_running(session_obj):
+            Sessions.stop_session(session_obj, reset_storage=True)
         Storage.delete_file(f"sessions/{session.esc_name}")
-        Sessions.delete_storage(session)
+        Sessions.delete_storage(session_obj)
 
     @staticmethod
     def export_json(session: str, stdout=False, file=None):
@@ -157,7 +174,7 @@ class session:
         """
         if file:
             esc_name = name.replace(" ", "_").lower()
-            Storage.add_file(file,f"{esc_name}.json","sessions",force)
+            Storage.add_file(file, f"{esc_name}.json", "sessions", force)
         elif stdin:
             print("import from stdin is not yet supported")
         else:

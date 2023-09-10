@@ -1,9 +1,10 @@
 from ..controllers import Storage
+from .. import config as CONFIG
 
 
 class db:
     @staticmethod
-    def list_databases(verbose=False):
+    def list(verbose=False):
         """list existing databases
 
         :param verbose: show infos about database, defaults to False
@@ -32,6 +33,9 @@ class db:
         :param format: only bw2package format is currently supported, defaults to "bw2package"
         :type format: str, optional
         """
+        if CONFIG.SERVER_MODE:
+            link = request.args.get("link", default=False, type=bool)
+            force = request.args.get("force", default=False, type=bool)
         Storage.add_file(file, name, folder="databases", force=force, link=link)
 
     @staticmethod

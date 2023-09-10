@@ -42,7 +42,7 @@ class Client:
         )
 
         start = subparsers.add_parser(
-            "start", description="Start session(s).", help="start session(s)"
+            "start", description="Start session.", help="start session"
         )
         start.set_defaults(func=self.api.session.start)
         start.add_argument(
@@ -63,18 +63,18 @@ class Client:
         start.add_argument("session", nargs="?", help="session name")
 
         build = subparsers.add_parser(
-            "build", description="Build session(s).", help="build session(s)"
+            "build", description="Build session.", help="build session"
         )
         build.set_defaults(func=self.api.session.build)
         build.add_argument(
             "-a", "--all", action="store_true", help="build all sessions"
         )
-        build.add_argument("sessions", nargs="*", default="", help="session(s) names")
+        build.add_argument("session", nargs="?", default="", help="session names")
 
         stop = subparsers.add_parser(
             "stop",
-            description="Stop running session(s).",
-            help="stop running session(s)",
+            description="Stop running session.",
+            help="stop running session",
         )
         stop.set_defaults(func=self.api.session.stop)
         stop.add_argument("-a", "--all", action="store_true", help="stop all sessions")
@@ -84,7 +84,7 @@ class Client:
             action="store_true",
             help="delete session containers storage",
         )
-        stop.add_argument("sessions", nargs="*", default="", help="session(s) name")
+        stop.add_argument("session", nargs="?", default="", help="session name")
 
         add = subparsers.add_parser(
             "add", description="Add session file.", help="add session"
@@ -93,13 +93,15 @@ class Client:
         add.add_argument(
             "-f", "--force", action="store_true", help="restart if already started"
         )
-        add.add_argument("-n", "--name", nargs="?", default="", help="session name", required=True)
+        add.add_argument(
+            "-n", "--name", nargs="?", default="", help="session name", required=True
+        )
         add.add_argument("file", nargs="?", default="", help="session file")
 
         ps = subparsers.add_parser(
             "list", aliases=["ps"], description="List sessions.", help="list sessions"
         )
-        ps.set_defaults(func=self.api.session.list_sessions)
+        ps.set_defaults(func=self.api.session.list)
         ps.add_argument(
             "-r", "--running", action="store_true", help="print only running sessions"
         )
