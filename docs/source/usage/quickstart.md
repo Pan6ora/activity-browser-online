@@ -8,6 +8,8 @@ conda activate ab-online
 ```
 
 - ensure that you have Docker installed and configured
+    - docker is installed
+    - your user is in the docker group
 - start the example session by running:
 
 ```
@@ -21,4 +23,4 @@ ab-online/local:example	example-0       Up 1 minute
 ab-online/novnc:latest	example-gate    Up 1 minute
 ```
 
-- connect to the only machine of this session at: [http://localhost:8080/vnc.html?resize=remote&path=novnc/websockify?token=0](http://localhost:8080/vnc.html?resize=remote&path=novnc/websockify?token=0)
+- connect to the only machine of this session at: [http://localhost](http://localhost)
