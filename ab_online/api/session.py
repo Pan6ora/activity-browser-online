@@ -157,25 +157,28 @@ class session:
         :param file: file to save json into, defaults to None
         :type file: _type_, optional
         """
-        pass
+        session_obj = Sessions.sessions[session]
+        json_object = session_obj.to_json()
+        if stdout:
+            print(json_object)
+        if file:
+            with open(file, "w") as outfile:
+                outfile.write(json_object)
+        return json_object
 
     @staticmethod
-    def import_json(name: str, stdin=False, file=None, force=False):
+    def import_json(name: str, file, force=False):
         """import session from json
 
         :param session: name of the session
         :type session: str
-        :param stdin: get data from stdin instead of file, defaults to False
-        :type stdin: bool, optional
-        :param file: file from which to get data, defaults to None
-        :type file: _type_, optional
+        :param file: file from which to get data
+        :type file: str
         :param force: if session already exist replace it, defaults to False
         :type force: bool, optional
         """
         if file:
             esc_name = name.replace(" ", "_").lower()
             Storage.add_file(file, f"{esc_name}.json", "sessions", force)
-        elif stdin:
-            print("import from stdin is not yet supported")
         else:
-            print("Error: file or stdin must be provided")
+            print("Error: file must be provided")

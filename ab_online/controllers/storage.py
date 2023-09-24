@@ -59,7 +59,7 @@ class Storage:
             return [os.path.splitext(filename)[0] for filename in os.listdir(path)]
 
     @classmethod
-    def read_json(cls, file: str):
+    def from_json(cls, file: str):
         """Convert json file to python dict
 
         :return: a new dictionary with json content
