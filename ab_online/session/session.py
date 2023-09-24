@@ -11,6 +11,7 @@ class Session:
     def __init__(self, file=None):
         """instantiate a session from a
         json file"""
+        self.dict: dict
         self.file: str  #: path of json file of the session
         self.name: str  #: session name
         self.esc_name: str  #: escaped name (without spaces)
@@ -28,26 +29,26 @@ class Session:
 
     def populate_from_file(self, file):
         """Populate session values from a session file"""
-        session_dict = self.validate_session(file)
+        self.dict = self.validate_session(file)
         # Populate session infos
         self.file = file
-        self.name = session_dict["name"]
+        self.name = self.dict["name"]
         self.esc_name = self.name.replace(" ", "_").lower()
         self.tag = f"ab_online/session:{self.esc_name}"
-        self.password = session_dict["password"]
-        self.machines = session_dict["machines"]
-        self.ab_channel = session_dict["ab_channel"]
-        self.ab_version = session_dict["ab_version"]
+        self.password = self.dict["password"]
+        self.machines = self.dict["machines"]
+        self.ab_channel = self.dict["ab_channel"]
+        self.ab_version = self.dict["ab_version"]
         # Populate plugins list
-        for x in session_dict["plugins"]:
+        for x in self.dict["plugins"]:
             self.plugins[x["name"]] = Plugin(x["name"], x["ab_channel"], x["version"])
         # Populate databases list
-        for x in session_dict["databases"]:
+        for x in self.dict["databases"]:
             self.databases[x["name"]] = Database(
                 x["name"], x["filename"], x["location"]
             )
         # Populate projects list
-        for x in session_dict["projects"]:
+        for x in self.dict["projects"]:
             project = Project(x["name"])
             for db in x["databases"]:
                 project.add_database(self.databases[db])
@@ -55,7 +56,7 @@ class Session:
                 project.add_plugin(self.plugins[plugin])
             self.projects[x["name"]] = project
 
-    def read_json(self, file: str):
+    def from_json(self, file: str):
         """Convert json file to python dict
 
         :return: a new dictionary with json content
@@ -65,11 +66,15 @@ class Session:
             result_dict = json.load(f)
             return result_dict
 
+    def to_json(self):
+        json_object = json.dumps(self.dict, indent=4)
+        return json_object
+
     def validate_session(self, file):
         """perform a list of tests on a
         session to check if it is valid
         """
-        session_dict = self.read_json(file)
+        session_dict = self.from_json(file)
         # check primary key list
         for key in [
             "name",
