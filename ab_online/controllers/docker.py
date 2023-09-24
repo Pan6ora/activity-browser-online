@@ -67,6 +67,10 @@ class Docker:
             volumes={
                 f"{CONFIG.STORAGE}/proxy/data": {"bind": "/data", "mode": "rw"},
                 f"{CONFIG.STORAGE}/proxy/storage": {"bind": "/storage", "mode": "rw"},
+                f"{CONFIG.STORAGE}/proxy/users.json": {
+                    "bind": "/root/.local/caddy/users.json",
+                    "mode": "rw",
+                },
                 f"{CONFIG.STORAGE}/proxy/Caddyfile": {
                     "bind": "/etc/caddy/Caddyfile",
                     "mode": "ro",

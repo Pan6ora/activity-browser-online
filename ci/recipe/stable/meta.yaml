@@ -21,6 +21,7 @@ requirements:
   - appdirs
   - werkzeug
   - docker-py
+  - bcrypt
 
 about:
   home: https://github.com/Pan6ora/activity-browser-online

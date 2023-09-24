@@ -1,4 +1,5 @@
 import json
+import bcrypt
 
 from .plugin import Plugin
 from .database import Database
@@ -26,6 +27,12 @@ class Session:
 
         if file:
             self.populate_from_file(file)
+
+    def hash_password(self):
+        bytes = self.password.encode("utf-8")
+        salt = bcrypt.gensalt()
+        hash = bcrypt.hashpw(bytes, salt)
+        return hash
 
     def populate_from_file(self, file):
         """Populate session values from a session file"""

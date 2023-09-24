@@ -1,3 +1,33 @@
-localhost
+{ 
+	order authenticate before respond
+	order authorize before basicauth
 
-respond "Hello, world!"
+	security {
+		local identity store localdb {
+			realm local
+			path /root/.local/caddy/users.json
+		}
+		authentication portal myportal {
+			crypto default token lifetime 3600
+			cookie lifetime 86400
+			cookie samesite lax
+			enable identity store localdb
+			cookie domain *.ab-online.localhost
+		}
+		$authorization
+	}
+}
+
+ab-online.localhost { 
+	root * /home/home  
+	file_server browse 
+}
+auth.ab-online.localhost {
+	route {
+		authenticate with myportal
+	}
+}             
+api.ab-online.localhost { 
+	reverse_proxy localhost:5000 
+}
+$redirect

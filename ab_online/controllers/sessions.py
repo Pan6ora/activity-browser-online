@@ -1,3 +1,6 @@
+import json
+from string import Template
+
 from .. import config as CONFIG
 from .storage import Storage
 from .docker import Docker
@@ -6,7 +9,7 @@ from ..session import Session
 
 class Sessions:
     storage_path = f"{CONFIG.STORAGE}/sessions_storage"
-    running_sessions = []
+    running_sessions: list[Session] = []
     sessions = {}
 
     @classmethod
@@ -34,6 +37,7 @@ class Sessions:
             cls.stop_proxy()
         cls.generate_main_home()
         cls.generate_caddyfile()
+        cls.generate_users_file()
 
     @classmethod
     def build_session(cls, session):
@@ -128,6 +132,7 @@ class Sessions:
     @classmethod
     def start_proxy(cls):
         cls.generate_caddyfile()
+        cls.generate_users_file()
         Docker.client.networks.create("ABonline")
         try:
             Docker.start_caddy_proxy()
@@ -211,32 +216,50 @@ class Sessions:
                 )
 
     @classmethod
-    def generate_caddyfile(cls):
-        with open(f"{CONFIG.STORAGE}/proxy/Caddyfile", "w") as file:
-            file.writelines(
-                [
-                    f"{CONFIG.DOMAIN} \u007b \n",
-                    "root * /home/home  \n",
-                    "file_server browse \n",
-                    "}                 \n",
-                    f"api.{CONFIG.DOMAIN} \u007b \n",
-                    "reverse_proxy localhost:5000 \n",
-                    "}                 \n",
-                ]
+    def generate_users_file(cls):
+        users_dict = {"users": []}
+        for session in cls.running_sessions:
+            id = session.esc_name + "0" * (36 - len(session.esc_name))
+            users_dict["users"].append(
+                {
+                    "id": id,
+                    "username": session.esc_name,
+                    "passwords": [{"hash": session.hash_password().decode()}],
+                    "roles": [{"name": session.esc_name, "organization": "authp"}],
+                }
             )
-            for session in cls.running_sessions:
-                file.writelines(
-                    [
-                        f"{session.esc_name}.{CONFIG.DOMAIN} \u007b\n",
-                        f"reverse_proxy {session.esc_name}-gate:8080\n",
-                        "}\n",
-                    ]
-                )
-                file.writelines(
-                    [
-                        f"home.{session.esc_name}.{CONFIG.DOMAIN} \u007b\n",
-                        f"root * /home/storage/{session.esc_name}/home\n",
-                        "file_server browse\n",
-                        "}\n",
-                    ]
-                )
+        json_object = json.dumps(users_dict, indent=4)
+        with open(f"{CONFIG.STORAGE}/proxy/users.json", "w") as outfile:
+            outfile.write(json_object)
+
+    @classmethod
+    def generate_caddyfile(cls):
+        authorization = ""
+        redirect = ""
+        for session in cls.running_sessions:
+            authorization += f"""
+            authorization policy {session.esc_name} \u007b\n
+            set auth url https://auth.ab-online.localhost/\n
+            allow roles authp/{session.esc_name}\n
+            }}\n
+            """
+            redirect += f"""
+            {session.esc_name}.{CONFIG.DOMAIN} \u007b\n
+            authorize with {session.esc_name}\n
+            reverse_proxy {session.esc_name}-gate:8080\n
+            }}\n
+            home.{session.esc_name}.{CONFIG.DOMAIN} \u007b\n
+            authorize with {session.esc_name}\n
+            root * /home/storage/{session.esc_name}/home\n
+            file_server browse\n
+            }}\n
+            """
+        d = {
+            "authorization": authorization,
+            "redirect": redirect,
+        }
+        with open(f"{CONFIG.INCLUDES}/Caddyfile", "r") as f:
+            src = Template(f.read())
+            result = src.substitute(d)
+        with open(f"{CONFIG.STORAGE}/proxy/Caddyfile", "w") as file:
+            file.writelines(result)

@@ -6,3 +6,4 @@ sphinx-rtd-theme
 appdirs
 docker
 flask
+bcrypt

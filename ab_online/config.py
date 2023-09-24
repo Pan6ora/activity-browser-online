@@ -10,6 +10,6 @@ DEBUG = False  # print debug logs
 INCLUDES = pkg_resources.resource_filename(
     __name__, "includes"
 )  # app includes location
-DOMAIN = "localhost"  # web url
+DOMAIN = "ab-online.localhost"  # web url
 DEV = False  # use current folder code instead of ab-online app when building docker
 SERVER_MODE = False  # used in the API
