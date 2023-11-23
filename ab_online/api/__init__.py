@@ -5,6 +5,9 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from ..controllers import *
 from .. import config as CONFIG
 
+Storage.init_storage()
+Sessions.read_sessions()
+
 
 class WebAPI:
     def __init__(self):
