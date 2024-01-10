@@ -57,6 +57,6 @@ Exemple:
         }
     ]
 }
+```
 
 For the complete description of sessions file see the json schema in **code reference**.
-```

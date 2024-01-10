@@ -16,11 +16,11 @@ from ab_online import API
 API.session.list()
 ```
 
-This can be useful to do complex stuff or create a write an interface in Python.
+This can be useful to do complex stuff or create an interface in Python.
 
 ## As a Web API
 
-In an effort to make user able to create web interfaces without using a Python framework the API can also be accessed through web requests.
+In an effort to make people able to create web interfaces without using a Python framework the API can also be accessed through web requests.
 
 - start the local server with: `ab-online server`
 - send requests on [https://localhost:5000/api/v1](https://localhost:5000/api/v1)

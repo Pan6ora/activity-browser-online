@@ -11,5 +11,3 @@ This project is in early stage. Be careful that things might change drastically 
 ## Documentation
 
 The documentation of this project is available on [readthedocs](https://activity-browser-online.readthedocs.io/en/latest/).
-
-
