@@ -1,0 +1,49 @@
+FROM mambaorg/micromamba:latest as micromamba
+FROM consol/debian-xfce-vnc:latest
+
+# Switch to root user to install additional software
+USER 0
+
+RUN apt install -y openbox
+ADD ./src/common/lightdm/ $HOME/
+RUN chmod a+x  $HOME/.config/openbox/*
+
+# if your image defaults to a non-root user, then you may want to make the
+# next 3 ARG commands match the values in your image. You can get the values
+# by running: docker run --rm -it my/image id -a
+ARG MAMBA_USER=default
+ARG MAMBA_USER_ID=1000
+ARG MAMBA_USER_GID=1000
+
+ENV MAMBA_USER=$MAMBA_USER
+ENV MAMBA_ROOT_PREFIX="/opt/conda"
+ENV MAMBA_EXE="/bin/micromamba"
+
+COPY --from=micromamba "$MAMBA_EXE" "$MAMBA_EXE"
+COPY --from=micromamba /usr/local/bin/_activate_current_env.sh /usr/local/bin/_activate_current_env.sh
+COPY --from=micromamba /usr/local/bin/_dockerfile_shell.sh /usr/local/bin/_dockerfile_shell.sh
+COPY --from=micromamba /usr/local/bin/_entrypoint.sh /usr/local/bin/_entrypoint.sh
+COPY --from=micromamba /usr/local/bin/_dockerfile_initialize_user_accounts.sh /usr/local/bin/_dockerfile_initialize_user_accounts.sh
+COPY --from=micromamba /usr/local/bin/_dockerfile_setup_root_prefix.sh /usr/local/bin/_dockerfile_setup_root_prefix.sh
+
+RUN /usr/local/bin/_dockerfile_initialize_user_accounts.sh
+RUN /usr/local/bin/_dockerfile_setup_root_prefix.sh
+
+USER 1000
+
+SHELL ["/usr/local/bin/_dockerfile_shell.sh"]
+
+ENTRYPOINT ["/home/default/start_ab.sh", "/dockerstartup/vnc_startup.sh"]
+#ENTRYPOINT ["/dockerstartup/vnc_startup.sh"]
+# Optional: if you want to customize the ENTRYPOINT and have a conda
+# environment activated, then do this:
+# ENTRYPOINT ["/usr/local/bin/_entrypoint.sh", "my_entrypoint_program"]
+
+# You can modify the CMD statement as needed....
+#CMD ["/home/default/start_ab.sh"]                                                             
+#CMD ["/dockerstartup/vnc_startup.sh", "&"]
+#CMD ["/usr/local/bin/_entrypoint.sh"]
+
+# Optional: you can now populate a conda environment:
+RUN micromamba install -y -n base --channel conda-forge activity-browser
+RUN micromamba clean --all --yes
