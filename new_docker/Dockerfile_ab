@@ -1,0 +1,53 @@
+FROM mambaorg/micromamba:alpine
+
+USER root
+
+ARG ab_channel
+ARG ab_version
+
+# Install system packages
+RUN apk --update --upgrade --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/ add \
+      supervisor    \
+      xvfb          \
+      x11vnc        \
+      pciutils-libs \
+      st \
+      mesa          \
+      fluxbox \
+      gdb
+
+# Install conda packages
+RUN micromamba install -y -n base -c conda-forge   \
+    activity-browser=2.9.0                                \
+    xorg-libxtst                                                   \
+    xorg-libxrandr                                                  \
+    xorg-libxdamage                                                 \
+    xorg-libxcomposite 
+RUN micromamba clean --all --yes
+
+RUN micromamba remove -y -n base --force pyside2 qt-main qt-webengine
+RUN micromamba install -y -n base -c conda-forge pyside2=5.15.4 qt-main=5.15.4 qt-webengine=5.15.4
+
+# Setup environment
+ENV HOME=/home/mambauser                        \
+    DEBIAN_FRONTEND=noninteractive              \
+    LANG=en_US.UTF-8                            \
+    LANGUAGE=en_US.UTF-8                        \
+    LC_ALL=C.UTF-8                              \
+    DISPLAY=:0.0                                \
+    DISPLAY_WIDTH=1366                          \
+    DISPLAY_HEIGHT=768                          \
+    QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox"
+
+RUN apk add py3-pyside2
+
+# Add supervisord to launch programs at startup
+COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Setup fluxbox
+COPY config/fluxbox/init /home/mambauser/.fluxbox/init
+COPY config/fluxbox/apps /home/mambauser/.fluxbox/apps
+
+USER mambauser
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

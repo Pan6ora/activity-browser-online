@@ -1,0 +1,5 @@
+FROM mambaorg/micromamba:alpine
+
+USER root
+
+RUN set -ex && apk --no-cache add sudo
