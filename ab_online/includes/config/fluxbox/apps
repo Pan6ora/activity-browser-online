@@ -1,6 +1,0 @@
-[app] (name=activity-browser)
-  [Position]    (WINCENTER)     {0 0}
-  [Layer]       {2}
-  [Deco]    {0x6}
-  [Maximized]   {yes}
-[end]
