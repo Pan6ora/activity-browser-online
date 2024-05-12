@@ -43,12 +43,12 @@ class Machine:
             bw.projects.delete_project("default", delete_dir=True)
         # set default project
         ABsettings = {
-            "current_bw_dir": "/home/mambauser/.local/share/Brightway3",
-            "custom_bw_dirs": ["/home/mambauser/.local/share/Brightway3"],
+            "current_bw_dir": "/headless/.local/share/Brightway3",
+            "custom_bw_dirs": ["/headless/.local/share/Brightway3"],
             "startup_project": list(session.projects.keys())[0],
         }
         json_object = json.dumps(ABsettings, indent=4)
         with open(
-            "/home/mambauser/.local/share/ActivityBrowser/ABsettings.json", "w"
+            "/headless/.local/share/ActivityBrowser/ABsettings.json", "w"
         ) as f:
             f.write(json_object)

@@ -39,6 +39,10 @@ class Docker:
             if network.name == session.esc_name:
                 network.remove()
         cls.client.networks.prune()
+    @classmethod
+    def create_main_network(cls):
+        if not cls.client.networks.list(names="ABonline"):
+            Docker.client.networks.create("ABonline")
 
     @classmethod
     def remove_main_network(cls):
@@ -134,7 +138,7 @@ class Docker:
             name=name,
             hostname=name,
             network=session.esc_name,
-            # volumes={f"{cls.storage_path}/{session.esc_name}/{id}": {'bind': '/home/mambauser/.local/share/Brightway3', 'mode': 'rw'}}
+            # volumes={f"{cls.storage_path}/{session.esc_name}/{id}": {'bind': '/headless/.local/share/Brightway3', 'mode': 'rw'}}
         )
 
     @classmethod
@@ -148,13 +152,16 @@ class Docker:
         This can take some time depending the amount of
         plugins/databases but has to be done only once
         """
-        plugins_install = "micromamba install -y -n base"
-        plugins_list = ""
-        for plugin in session.plugins.values():
-            if plugin.channel != "local":
-                plugins_install += f" -c {plugin.channel}"
-                plugins_list += f" ab-plugin-{plugin.name}"
-        plugins_install += f" -c conda-forge {plugins_list}"
+        plugins_install = "true"
+        if len(session.plugins.values()):
+            plugins_install = "micromamba install -y -n base"
+            plugins_list = ""
+            for plugin in session.plugins.values():
+                if plugin.channel != "local":
+                    plugins_install += f" -c {plugin.channel}"
+                    plugins_list += f" ab-plugin-{plugin.name}"
+            plugins_install += f" -c conda-forge {plugins_list}"
+        print(plugins_install)
 
         if CONFIG.DEV:
             setup_command = "python run-ab-online.py setup session.json"
@@ -220,7 +227,7 @@ class Docker:
         buildargs = {"ab_channel": channel, "ab_version": version}
         cls.client.images.build(
             path=CONFIG.INCLUDES,
-            dockerfile="Dockerfile_ab",
+            dockerfile="Dockerfile.ab",
             buildargs=buildargs,
             tag=tag,
             rm=True,

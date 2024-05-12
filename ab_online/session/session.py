@@ -1,6 +1,7 @@
 import json
 import bcrypt
-
+import sys
+from .. import config as CONFIG
 from .plugin import Plugin
 from .database import Database
 from .project import Project
@@ -9,7 +10,7 @@ from .project import Project
 class Session:
     """AB Online session"""
 
-    def __init__(self, file=None):
+    def __init__(self, file=None, session_dict=None):
         """instantiate a session from a
         json file"""
         self.dict: dict
@@ -26,7 +27,9 @@ class Session:
         self.projects: dict[str, Project] = {}  #: session projects
 
         if file:
-            self.populate_from_file(file)
+            self.populate(file=file)
+        elif session_dict:
+            self.populate(session_dict=session_dict)
 
     def hash_password(self):
         bytes = self.password.encode("utf-8")
@@ -34,18 +37,27 @@ class Session:
         hash = bcrypt.hashpw(bytes, salt)
         return hash
 
-    def populate_from_file(self, file):
+    def populate(self, session_dict=None, file=None):
         """Populate session values from a session file"""
-        self.dict = self.validate_session(file)
+        if file:
+            session_dict = self.from_json(file)
+        self.dict = self.validate_session(session_dict)
+        if isinstance(self.dict, str):
+            print("Error:"+self.dict)
+            exit(1)
         # Populate session infos
         self.file = file
         self.name = self.dict["name"]
         self.esc_name = self.name.replace(" ", "_").lower()
         self.tag = f"ab_online/session:{self.esc_name}"
         self.password = self.dict["password"]
-        self.machines = self.dict["machines"]
+        self.machines = int(self.dict["machines"])
         self.ab_channel = self.dict["ab_channel"]
         self.ab_version = self.dict["ab_version"]
+        if not file:
+            self.file = f"{CONFIG.STORAGE}/sessions/{self.esc_name}.json"
+        else:
+            self.file = file
         # Populate plugins list
         for x in self.dict["plugins"]:
             self.plugins[x["name"]] = Plugin(x["name"], x["ab_channel"], x["version"])
@@ -77,11 +89,10 @@ class Session:
         json_object = json.dumps(self.dict, indent=4)
         return json_object
 
-    def validate_session(self, file):
+    def validate_session(self, session_dict):
         """perform a list of tests on a
         session to check if it is valid
         """
-        session_dict = self.from_json(file)
         # check primary key list
         for key in [
             "name",

@@ -1,6 +1,7 @@
 from flask import jsonify, request
 
 from ..controllers import Sessions, Storage
+from ..session import Session
 from .. import config as CONFIG
 
 
@@ -157,8 +158,12 @@ class session:
         :param file: file to save json into, defaults to None
         :type file: _type_, optional
         """
-        session_obj = Sessions.sessions[session]
-        json_object = session_obj.to_json()
+        if isinstance(session, str):
+            if session not in Sessions.sessions.keys():
+                raise ValueError(f"session '{session}' does not exist")
+            else:
+                session = Sessions.sessions[session]
+        json_object = session.to_json()
         if stdout:
             print(json_object)
         if file:
@@ -182,3 +187,10 @@ class session:
             Storage.add_file(file, f"{esc_name}.json", "sessions", force)
         else:
             print("Error: file must be provided")
+
+    @staticmethod
+    def import_dict(session_dict):
+        session = Session(session_dict=session_dict)
+        Sessions.add_session(session)
+        
+        return session

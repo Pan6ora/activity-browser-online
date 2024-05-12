@@ -49,7 +49,7 @@ class Storage:
 
         :param folder: path within storage, defaults to ""
         :type folder: str, optional
-        :param extension: show files extension, defaults to False
+        :param extension: show files extension, defaults to True
         :type extension: bool, optional
         """
         path = f"{CONFIG.STORAGE}/{folder}"

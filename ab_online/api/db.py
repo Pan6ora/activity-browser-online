@@ -4,13 +4,15 @@ from .. import config as CONFIG
 
 class db:
     @staticmethod
-    def list(verbose=False):
+    def list(verbose=False, extension=False):
         """list existing databases
 
         :param verbose: show infos about database, defaults to False
         :type verbose: bool, optional
+        :param extension: show files extension, defaults to False
+        :type extension: bool
         """
-        return Storage.list_files("databases", extension=False)
+        return Storage.list_files("databases", extension=extension)
 
     @staticmethod
     def add(

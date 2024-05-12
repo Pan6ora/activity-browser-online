@@ -26,6 +26,20 @@ class Sessions:
         return sessions
 
     @classmethod
+    def add_session(cls, session: Session):
+        print(session.esc_name)
+        cls.sessions[session.esc_name] = session
+
+    @classmethod
+    def save_session(cls, session):
+        if isinstance(session, str):
+            if session not in cls.sessions.keys():
+                raise ValueError(f"session '{session}' does not exist")
+            else:
+                session = cls.sessions[session]
+           
+
+    @classmethod
     def is_running(cls, session):
         networks = Docker.client.networks.list(names=session.esc_name)
         return bool(networks)
@@ -105,7 +119,7 @@ class Sessions:
         cls.generate_session_home(session)
 
         print("  - create main network")
-        Docker.client.networks.create("ABonline")
+        Docker.create_main_network()
 
         print("  - start novnc container")
         Docker.start_novnc_gate(session)
@@ -133,7 +147,6 @@ class Sessions:
     def start_proxy(cls):
         cls.generate_caddyfile()
         cls.generate_users_file()
-        Docker.client.networks.create("ABonline")
         try:
             Docker.start_caddy_proxy()
         except:
@@ -188,7 +201,7 @@ class Sessions:
             f"{cls.storage_path}/{session.esc_name}/novnc/token.list", "w"
         ) as file:
             for i in range(session.machines):
-                file.write(f"{i}: {session.esc_name}-{i}:5900\n")
+                file.write(f"{i}: {session.esc_name}-{i}:5901\n")
 
     @classmethod
     def generate_session_home(cls, session):
@@ -198,7 +211,7 @@ class Sessions:
         ) as file:
             for i in range(session.machines):
                 file.write(
-                    f'<a href="https://{session.esc_name}.{CONFIG.DOMAIN}/vnc.html?resize=remote&amp;path=novnc/websockify?token={i}">Machine n°{i}</a><br>\n'
+                    f'<a href="https://{session.esc_name}.{CONFIG.DOMAIN}/vnc.html?autoconnect=true&resize=remote&amp;path=novnc/websockify?token={i}">Machine n°{i}</a><br>\n'
                 )
         Storage.add_file(
             f"{CONFIG.INCLUDES}/httpd.conf",
