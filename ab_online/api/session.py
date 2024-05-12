@@ -138,13 +138,18 @@ class session:
         :param force: delete even if running, defaults to False
         :type force: bool, optional
         """
+        if isinstance(session, str):
+            if session not in Sessions.sessions.keys():
+                raise ValueError(f"session '{session}' does not exist")
+            else:
+                session_obj = Sessions.sessions[session]
         if CONFIG.SERVER_MODE:
             reset = request.args.get("reset", default=False, type=bool)
             force = request.args.get("force", default=False, type=bool)
-        session_obj = Sessions.sessions[session]
         if Sessions.is_running(session_obj):
             Sessions.stop_session(session_obj, reset_storage=True)
-        Storage.delete_file(f"sessions/{session.esc_name}")
+        Storage.delete_file(f"sessions/{session_obj.esc_name}.json")
+        Sessions.remove_session(session_obj)
         Sessions.delete_storage(session_obj)
 
     @staticmethod
@@ -192,5 +197,5 @@ class session:
     def import_dict(session_dict):
         session = Session(session_dict=session_dict)
         Sessions.add_session(session)
-        
+
         return session

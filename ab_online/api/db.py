@@ -38,7 +38,8 @@ class db:
         if CONFIG.SERVER_MODE:
             link = request.args.get("link", default=False, type=bool)
             force = request.args.get("force", default=False, type=bool)
-        Storage.add_file(file, name, folder="databases", force=force, link=link)
+        Storage.add_file(file, name, folder="databases",
+                         force=force, link=link)
 
     @staticmethod
     def remove(name: str):
