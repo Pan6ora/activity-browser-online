@@ -27,8 +27,11 @@ class Sessions:
 
     @classmethod
     def add_session(cls, session: Session):
-        print(session.esc_name)
         cls.sessions[session.esc_name] = session
+
+    @classmethod
+    def remove_session(cls, session: Session):
+        cls.sessions.pop(session.esc_name)
 
     @classmethod
     def save_session(cls, session):
@@ -37,7 +40,6 @@ class Sessions:
                 raise ValueError(f"session '{session}' does not exist")
             else:
                 session = cls.sessions[session]
-           
 
     @classmethod
     def is_running(cls, session):
@@ -46,7 +48,8 @@ class Sessions:
 
     @classmethod
     def set_running_sessions(cls):
-        cls.running_sessions = [s for s in cls.sessions.values() if cls.is_running(s)]
+        cls.running_sessions = [
+            s for s in cls.sessions.values() if cls.is_running(s)]
         if not cls.running_sessions:
             cls.stop_proxy()
         cls.generate_main_home()
@@ -124,7 +127,8 @@ class Sessions:
         print("  - start novnc container")
         Docker.start_novnc_gate(session)
 
-        print(f"  - start {session.machines} containers from image {session.tag}")
+        print(
+            f"  - start {session.machines} containers from image {session.tag}")
         for id in range(session.machines):
             Docker.start_machine(session, id=id)
 
