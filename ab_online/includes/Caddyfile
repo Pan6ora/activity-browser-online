@@ -12,22 +12,22 @@
 			cookie lifetime 86400
 			cookie samesite lax
 			enable identity store localdb
-			cookie domain *.ab-online.localhost
+			cookie domain *.$domain
 		}
 		$authorization
 	}
 }
 
-ab-online.localhost { 
+$domain { 
 	root * /home/home  
 	file_server browse 
 }
-auth.ab-online.localhost {
+auth.$domain {
 	route {
 		authenticate with myportal
 	}
 }             
-api.ab-online.localhost { 
+api.$domain { 
 	reverse_proxy localhost:5000 
 }
 $redirect

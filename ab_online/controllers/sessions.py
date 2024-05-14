@@ -210,9 +210,13 @@ class Sessions:
     @classmethod
     def generate_session_home(cls, session):
         Storage.create_folder(f"sessions_storage/{session.esc_name}/home")
+        Storage.add_file(f"{CONFIG.INCLUDES}/main.css",
+                         "main.css", f"sessions_storage/{session.esc_name}/home")
         with open(
             f"{cls.storage_path}/{session.esc_name}/home/index.html", "w"
         ) as file:
+            file.write(
+                '<link rel="stylesheet" type="text/css" href="main.css">')
             for i in range(session.machines):
                 file.write(
                     f'<a href="https://{session.esc_name}.{CONFIG.DOMAIN}/vnc.html?autoconnect=true&resize=remote&amp;path=novnc/websockify?token={i}">Machine n°{i}</a><br>\n'
@@ -227,12 +231,14 @@ class Sessions:
     def generate_main_home(cls):
         Storage.create_folder("proxy/static")
         with open(f"{CONFIG.STORAGE}/proxy/static/index.html", "w") as file:
+            file.write(
+                '<link rel="stylesheet" type="text/css" href="main.css">')
             for session in cls.running_sessions:
                 file.write(
                     f'<a href="https://home.{session.esc_name}.{CONFIG.DOMAIN}">{session.name}</a><br>\n'
                 )
 
-    @classmethod
+    @ classmethod
     def generate_users_file(cls):
         users_dict = {"users": []}
         for session in cls.running_sessions:
@@ -249,14 +255,14 @@ class Sessions:
         with open(f"{CONFIG.STORAGE}/proxy/users.json", "w") as outfile:
             outfile.write(json_object)
 
-    @classmethod
+    @ classmethod
     def generate_caddyfile(cls):
         authorization = ""
         redirect = ""
         for session in cls.running_sessions:
             authorization += f"""
             authorization policy {session.esc_name} \u007b\n
-            set auth url https://auth.ab-online.localhost/\n
+            set auth url https://auth.{CONFIG.DOMAIN}/\n
             allow roles authp/{session.esc_name}\n
             }}\n
             """
@@ -274,6 +280,7 @@ class Sessions:
         d = {
             "authorization": authorization,
             "redirect": redirect,
+            "domain": CONFIG.DOMAIN,
         }
         with open(f"{CONFIG.INCLUDES}/Caddyfile", "r") as f:
             src = Template(f.read())
