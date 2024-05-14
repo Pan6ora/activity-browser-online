@@ -60,7 +60,8 @@ class Session:
             self.file = file
         # Populate plugins list
         for x in self.dict["plugins"]:
-            self.plugins[x["name"]] = Plugin(x["name"], x["ab_channel"], x["version"])
+            self.plugins[x["name"]] = Plugin(
+                x["name"], x["ab_channel"], x["version"])
         # Populate databases list
         for x in self.dict["databases"]:
             self.databases[x["name"]] = Database(

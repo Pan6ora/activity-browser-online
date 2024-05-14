@@ -27,6 +27,8 @@ class Storage:
         :type file: str
         :param name: name of the destination
         :type name: str
+        :param folder: folder (in storage) to put file into
+        :type folder: str
         :param force: replace existing file, defaults to False
         :type force: bool, optional
         :param link: create a link instead of copying, defaults to False
@@ -78,7 +80,8 @@ class Storage:
         cls.create_folder("proxy")
         cls.create_folder("local_code")
         cls.create_folder("local_code/ab_online")
-        cls.add_file(f"{CONFIG.INCLUDES}/httpd.conf", "run-ab-online.py", "local_code")
+        cls.add_file(f"{CONFIG.INCLUDES}/httpd.conf",
+                     "run-ab-online.py", "local_code")
         cls.add_file(
             f"{CONFIG.INCLUDES}/example_session.json", "example.json", "sessions"
         )
@@ -94,8 +97,9 @@ class Storage:
             "databases",
         )
         cls.add_file(
-            f"{CONFIG.INCLUDES}/Dockerfile_machine",
-            "Dockerfile_machine",
+            f"{CONFIG.INCLUDES}/Dockerfile.machine",
+            "Dockerfile.machine",
             "",
             force=True,
         )
+        cls.add_file(f"{CONFIG.INCLUDES}/settings.json", "settings.json", "")

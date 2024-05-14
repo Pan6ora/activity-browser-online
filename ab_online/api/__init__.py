@@ -29,6 +29,9 @@ class WebAPI:
 class API:
     from .session import session
     from .db import db
+    from .config import config
+
+    config.read_settings()
 
     web_api = WebAPI()
     app = web_api.app
@@ -81,7 +84,8 @@ class API:
     )
 
     app.add_url_rule("/api/v1/db/list", "list db", db.list, methods=["GET"])
-    app.add_url_rule("/api/v1/db/add", "add db", not_implemented, methods=["GET"])
+    app.add_url_rule("/api/v1/db/add", "add db",
+                     not_implemented, methods=["GET"])
     app.add_url_rule(
         "/api/v1/db/remove/<name>", "remove db", db.remove, methods=["GET"]
     )
