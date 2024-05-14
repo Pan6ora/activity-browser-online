@@ -39,6 +39,7 @@ class Docker:
             if network.name == session.esc_name:
                 network.remove()
         cls.client.networks.prune()
+
     @classmethod
     def create_main_network(cls):
         if not cls.client.networks.list(names="ABonline"):
@@ -61,7 +62,10 @@ class Docker:
         Storage.create_folder("proxy/storage")
         Storage.create_folder("proxy/static")
         Storage.add_file(f"{CONFIG.INCLUDES}/Caddyfile", "Caddyfile", "proxy")
-        Storage.add_file(f"{CONFIG.INCLUDES}/index.html", "index.html", "proxy/static")
+        Storage.add_file(f"{CONFIG.INCLUDES}/index.html",
+                         "index.html", "proxy/static")
+        Storage.add_file(f"{CONFIG.INCLUDES}/main.css",
+                         "main.css", "proxy/static")
         proxy = cls.client.containers.run(
             "androw/caddy-security:latest",
             detach=True,
@@ -166,7 +170,8 @@ class Docker:
         if CONFIG.DEV:
             setup_command = "python run-ab-online.py setup session.json"
             Storage.delete_folder("local_code")
-            shutil.copytree(f"{CONFIG.INCLUDES}/../..", f"{CONFIG.STORAGE}/local_code")
+            shutil.copytree(f"{CONFIG.INCLUDES}/../..",
+                            f"{CONFIG.STORAGE}/local_code")
         else:
             setup_command = "ab-online setup session.json"
 
@@ -186,7 +191,7 @@ class Docker:
         }
         image, build_logs = cls.client.images.build(
             path=CONFIG.STORAGE,
-            dockerfile=f"Dockerfile_machine",
+            dockerfile=f"Dockerfile.machine",
             buildargs=buildargs,
             tag=session.tag,
             rm=True,
@@ -241,7 +246,7 @@ class Docker:
         tag = "ab_online/novnc:latest"
         cls.client.images.build(
             path=CONFIG.INCLUDES,
-            dockerfile="Dockerfile_novnc",
+            dockerfile="Dockerfile.novnc",
             tag=tag,
             rm=True,
             forcerm=True,
