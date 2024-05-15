@@ -81,11 +81,12 @@ class Storage:
         cls.create_folder("local_code")
         cls.create_folder("local_code/ab_online")
         cls.add_file(f"{CONFIG.INCLUDES}/httpd.conf",
-                     "run-ab-online.py", "local_code")
+                     "run-ab-online.py", "local_code", force=True)
         cls.add_file(
             f"{CONFIG.INCLUDES}/example_session.json", "example.json", "sessions"
         )
-        cls.add_file(f"{CONFIG.INCLUDES}/.dockerignore", ".dockerignore", "")
+        cls.add_file(f"{CONFIG.INCLUDES}/.dockerignore",
+                     ".dockerignore", "", force=True)
         cls.add_file(
             f"{CONFIG.INCLUDES}/databases/biosphere3.bw2package",
             "biosphere3.bw2package",

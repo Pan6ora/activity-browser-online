@@ -165,7 +165,6 @@ class Docker:
                     plugins_install += f" -c {plugin.channel}"
                     plugins_list += f" ab-plugin-{plugin.name}"
             plugins_install += f" -c conda-forge {plugins_list}"
-        print(plugins_install)
 
         if CONFIG.DEV:
             setup_command = "python run-ab-online.py setup session.json"

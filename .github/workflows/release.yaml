@@ -1,8 +1,8 @@
 name: stable release
 on:
   push:
-    tags:        
-      - '*'
+    tags:
+      - "*"
 
 jobs:
   release:
@@ -20,7 +20,7 @@ jobs:
       - name: Create github release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: 'ci/conda-envs/ab.yml'
+          artifacts: "ci/conda-envs/ab.yml"
           commit: main
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up conda-build environment
