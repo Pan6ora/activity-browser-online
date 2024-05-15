@@ -85,7 +85,7 @@ class Storage:
         cls.add_file(
             f"{CONFIG.INCLUDES}/example_session.json", "example.json", "sessions"
         )
-        cls.add_file(f"{CONFIG.INCLUDES}/.dockerignore",
+        cls.add_file(f"{CONFIG.INCLUDES}/dockerignore",
                      ".dockerignore", "", force=True)
         cls.add_file(
             f"{CONFIG.INCLUDES}/databases/biosphere3.bw2package",
