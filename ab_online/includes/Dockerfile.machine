@@ -30,6 +30,6 @@ RUN mkdir -p $HOME/.local/share/Brightway3
 RUN eval "$(micromamba shell hook --shell=bash)" ; \
     micromamba activate base ;  \
     cd $HOME ;        \
-    ${setup_command}
+   ${setup_command}
 RUN rm -rf $HOME/.local/share/ActivityBrowserOnline
 EXPOSE 5901

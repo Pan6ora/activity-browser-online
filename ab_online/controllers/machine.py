@@ -21,7 +21,11 @@ class Machine:
             # add databases
             for database in project.databases:
                 filename = session.databases[database].filename
-                BW2Package().import_file(f"{CONFIG.STORAGE}/databases/{filename}")
+                try:
+                    BW2Package().import_file(
+                        f"{CONFIG.STORAGE}/databases/{filename}")
+                except:
+                    print(f"An error occurred on database '{filename}' import")
             # add plugins and databases to AB settings
             settings = {}
             settings["plugins_list"] = []
@@ -35,11 +39,13 @@ class Machine:
                 f.write(json_object)
             # default project exist, do not remove it
             if project.name == "default":
+                print("A project 'default' exist. Do not delete it")
                 default_exist = True
             # add default flows and methods
             bw.bw2setup()
 
-        if not default_exist:
+        if default_exist == False:
+            print("Deleting unwanted 'default' project")
             bw.projects.delete_project("default", delete_dir=True)
         # set default project
         ABsettings = {
