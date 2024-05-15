@@ -13,15 +13,15 @@ build:
 
 requirements:
   build:
-    - python =3.9
+    - python
     - setuptools
     - conda-verify
   run:
-  - flask
-  - appdirs
-  - werkzeug
-  - docker-py
-  - bcrypt
+    - flask
+    - appdirs
+    - werkzeug
+    - docker-py
+    - bcrypt
 
 about:
   home: https://github.com/Pan6ora/activity-browser-online
