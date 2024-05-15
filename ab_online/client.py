@@ -114,6 +114,14 @@ class Client:
             "server", description="Start http API server", help="start http API server"
         )
         server.set_defaults(func=self.api.run_server)
+        setup = subparsers.add_parser(
+            "setup",
+            description="Setup AB inside a machine",
+            help="setup AB inside a machine",
+        )
+        setup.set_defaults(func=Machine.setup_session)
+        setup.add_argument("session_file", nargs="?",
+                           default="", help="a session file")
         config = subparsers.add_parser(
             "config",
             description="Configure Activity Browser",
