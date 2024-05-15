@@ -40,9 +40,10 @@ setup(
     package_dir={"": "."},
     package_data={
         "ab_online": ["includes/*",
-                      "includes/.*",
                       "includes/config/*",
-                      "includes/databases/*",
-                      "includes/config/fluxbox/*"]
+                      "includes/config/install/*",
+                      "includes/config/openbox/*",
+                      "includes/config/scripts/*",
+                      "includes/databases/*"]
     },
 )
