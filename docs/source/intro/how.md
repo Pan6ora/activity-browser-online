@@ -2,14 +2,15 @@
 
 ## machine
 
-A machine is an environment running Activity Browser and accessible through NoVNC. 
+A machine is an environment running Activity Browser and accessible through NoVNC.
 It can be seen as a virtual machine that one user can connect to.
 
 ## sessions
 
-Sessions are used to define machines content. 
+Sessions are used to define machines content.
 
 A session is described in a json files. This file describes how many machines to launch and the Activity Browser configuration :
+
 - projects to create
 - databases to import in projects
 - plugins to activate in projects
@@ -28,4 +29,4 @@ The following scheme is an example with two sessions started:
 
 ## authentication
 
-The authentication is managed at a session level
+The authentication is managed by the main reverse proxy (using Caddy Security). Every session correspond to a user which means there is a unique password for all the session machines (which is set in session configuration).

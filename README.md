@@ -6,7 +6,11 @@ Launch reproducible [Activity Browser](https://github.com/LCA-ActivityBrowser/ac
 
 ## Current state
 
-This project is in early stage. Be careful that things might change drastically at any point. 
+This project is in early stage. Be careful that things might change drastically at any point.
+
+## Quick start
+
+See **Documentation** bellow.
 
 ## Documentation
 

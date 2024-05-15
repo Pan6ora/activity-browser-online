@@ -1,7 +1,8 @@
-Activity Browser Online
-=======================
+# Activity Browser Online
 
-Launch reproducible [Activity Browser](https://github.com/LCA-ActivityBrowser/activity-browser) sessions and distribute them using NoVNC.
+Launch reproducible [Activity Browser](https://github.com/LCA-ActivityBrowser/activity-browser) sessions and distribute them on the web using NoVNC.
+
+
 
 **This project is a personal work. It is not maintained by the Activity Browser team.**
 
@@ -9,7 +10,7 @@ Launch reproducible [Activity Browser](https://github.com/LCA-ActivityBrowser/ac
 .. toctree::
    :maxdepth: 1
    :caption: Introduction
-   
+
    intro/what.md
    intro/how.md
 
