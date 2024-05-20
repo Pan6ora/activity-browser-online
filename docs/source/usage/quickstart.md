@@ -11,6 +11,9 @@ The docker part is **for Debian** and it's derivative. For other OS adapt the co
 **Docker**
 
 ```
+sudo apt-get update
+sudo apt-get install -y curl
+
 # Add Docker's official GPG key:
 sudo install -m 0755 -d /etc/apt/keyrings
 sudo curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
@@ -21,7 +24,7 @@ echo \
   $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y -y
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y -y
 sudo groupadd docker
 sudo usermod -aG docker $USER
 ```
@@ -42,6 +45,11 @@ Restart your terminal to have anaconda ready to go. Then run:
 ```
 # update user groups to see $user in group docker
 exec su -l $USER
+```
+
+And finally change the conda solver (not needed but always au good idea):
+
+```
 # switch conda solver for faster dependencies solving
 conda update -n base conda
 conda install -y -n base conda-libmamba-solver
@@ -54,7 +62,7 @@ conda config --add channels conda-forge
 Install Activity Browser Online with conda:
 
 ```bash
-conda create -n ab-online -c pan6ora activity-browser-online
+conda create -y -n ab-online -c pan6ora activity-browser-online
 conda activate ab-online
 ```
 
