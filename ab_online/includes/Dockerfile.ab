@@ -50,10 +50,11 @@ ENV SESSION_MANAGER=openbox-session
 
 ### Install openbox UI
 RUN $INST_SCRIPTS/openbox_ui.sh
-ADD ./config/openbox/config $HOME/.config
-ADD ./config/openbox/vnc $HOME/.vnc
-ADD ./config/openbox/wm_startup.sh $HOME/wm_startup.sh
-ADD ./config/openbox/start_activity_browser.sh $HOME/start_activity_browser.sh
+RUN mkdir -p $HOME/.config
+ADD ./config/openbox $HOME/.config/openbox
+ADD ./config/vnc $HOME/.vnc
+ADD ./config/wm_startup.sh $HOME/wm_startup.sh
+ADD ./config/start_activity_browser.sh $HOME/start_activity_browser.sh
 RUN chmod a+x $HOME/.vnc/xstartup
 RUN chmod a+x $HOME/start_activity_browser.sh
 

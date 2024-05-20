@@ -44,6 +44,7 @@ setup(
                       "includes/config/install/*",
                       "includes/config/openbox/*",
                       "includes/config/scripts/*",
+                      "includes/config/vnc/*",
                       "includes/databases/*"]
     },
 )
