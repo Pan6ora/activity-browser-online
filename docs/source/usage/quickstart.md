@@ -166,8 +166,14 @@ To increase it's size you can try something like :
 
 ```
 sudo lvdisplay
-sudo lvresize <LV path> -L +5g
-sudo resize2fs <LV path>
+sudo lvresize <var LV path> -L +5g
+sudo resize2fs <var LV path>
+```
+
+if the 2nd command returns "no space left on device", try to shrink /home before extending /var:
+
+```
+sudo lvresize <home LV path> -L -5g
 ```
 
 Search on the internet for other ways to do it.
