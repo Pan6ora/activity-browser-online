@@ -69,7 +69,7 @@ class Docker:
         proxy = cls.client.containers.run(
             "androw/caddy-security:latest",
             detach=True,
-            ports={"80/tcp": 80, "443/tcp": 443},
+            ports={"8080/tcp": 8080, "443/tcp": 443},
             name="proxy",
             hostname="proxy",
             volumes={
