@@ -2,11 +2,15 @@
 
 Launch reproducible [Activity Browser](https://github.com/LCA-ActivityBrowser/activity-browser) sessions and distribute them using NoVNC.
 
-**This project is a personal work. It is not maintained by the Activity Browser team.**
+**This project is not maintained by the Activity Browser team.**
 
 ## Current state
 
-This project is in early stage. Be careful that things might change drastically at any point.
+This project has been released in 1.0.
+
+It has been successfully tested in a Debian virtual machine, in a local network. It has not been fully implemented in a real network environment yet.
+
+Thus it is likely that a real use will need some adaptations of the code to fit user's real environment.
 
 ## Quick start
 
